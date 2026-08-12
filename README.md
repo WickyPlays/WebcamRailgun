@@ -11,10 +11,10 @@ This project was made on the fly as sort of imagination when I was walking throu
 
 ## How It Works
 
-1. **Video Capture**: Captures video feed from the webcam attached to the gun toy
-2. **Image Processing**: Converts frames to grayscale and applies thresholding to detect white regions
-3. **Contour Detection**: Finds contours in the thresholded image
-4. **Shape Analysis**: Filters contours based on:
+1. Using OpenCV to capture video feed from the webcam attached to any handheld items you have, preferably a gun toy.
+2. It then converts frames to grayscale and applies thresholding to detect white regions (approx.)
+3. Finds contours in the thresholded image, meaning to find possible outline area for it.
+4. Filter contours based on:
    - Area (minimum and maximum thresholds)
    - Quadrilateral shape (4 corners)
    - Convexity
