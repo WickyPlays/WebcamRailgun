@@ -69,19 +69,22 @@ python index.py
 ```
 
 4. The application will open two windows:
-   - **Screen Detection**: Shows the video feed with detected screens highlighted in green
+   - **Camera**: Shows the video feed with detected screens highlighted in green
    - **White Mask**: Shows the thresholded binary image used for detection
 
 5. Press `ESC` or `q` to exit the application
+
+## Debug Mode
+- Set `DEBUG = True` in `debug.py` to enable verbose logging
+- Set `DEBUG = False` in `debug.py` to disable debug output
 
 ## Configuration
 
 You can adjust the following parameters in `index.py`:
 
-- `CAMERA_INDEX`: Webcam device index (default: 1)
-- `MIN_AREA`: Minimum contour area for detection (default: 15000)
+- `MIN_AREA_RATIO`: Minimum area as ratio of frame size (default: 0.02)
 - `MAX_AREA_RATIO`: Maximum area as ratio of frame size (default: 0.95)
-- `WHITE_THRESHOLD`: Threshold for white detection (default: 150)
+- `WHITE_THRESHOLD`: Threshold for white detection (default: 200)
 - `APPROX_EPSILON`: Epsilon for polygon approximation (default: 0.02)
 
 ## Technical Details
@@ -91,29 +94,35 @@ You can adjust the following parameters in `index.py`:
 The system uses a multi-stage detection pipeline:
 
 1. **Grayscale Conversion**: Converts BGR frames to grayscale
-2. **Thresholding**: Binary threshold to isolate white regions
-3. **Morphological Operations**: 
-   - Closing to fill gaps
-   - Opening to remove noise
-4. **Contour Detection**: Finds external contours using RETR_EXTERNAL
-5. **Shape Filtering**: 
-   - Area validation
-   - Polygon approximation to 4 vertices
+2. **Gaussian Blur**: Applies 5x5 blur to reduce noise
+3. **Thresholding**: Binary threshold to isolate white regions (default: 200)
+4. **Morphological Operations**:
+   - Closing (2 iterations) to fill gaps
+   - Opening (1 iteration) to remove noise
+5. **Contour Detection**: Finds external contours using RETR_EXTERNAL
+6. **Shape Filtering**:
+   - Area validation (2% to 95% of frame area)
+   - Polygon approximation to 4 vertices (epsilon: 0.02)
    - Convexity check
-   - Corner angle validation (45-135 degrees or 90 degrees constant, might change this later since it's too high gap I think)
-6. **Center Calculation**: Computes mean of corner coordinates
+   - Corner angle validation (cosine < 0.35, approximately 70+ degrees)
+   - Dimension validation (minimum width: 100, minimum height: 80)
+   - Aspect ratio validation (1.2 to 5.0)
+   - White border ratio validation (minimum 30% white pixels)
+7. **Center Calculation**: Uses homography transformation to compute screen center
 
 ## Troubleshooting
 
 ### Webcam not detected
-- Check if the correct `CAMERA_INDEX` is set (try 0 or 1)
+- Check if the correct camera index is set (try 0 or 1)
 - Ensure webcam drivers are installed
 - Verify webcam is working with other applications
 
 ### Poor detection accuracy
-- Adjust `WHITE_THRESHOLD` based on lighting conditions
-- Modify `MIN_AREA` for different screen sizes
+- Adjust `WHITE_THRESHOLD` based on lighting conditions (default: 200)
+- Modify `MIN_AREA_RATIO` for different screen sizes (default: 0.02)
 - Ensure the target screen is well-lit and contrasted
+- Check if white border is clearly visible around the screen
+- Adjust `APPROX_EPSILON` if corners are not being detected accurately
 
 ### Performance issues
 - Reduce video resolution in camera settings

@@ -64,7 +64,7 @@ def is_screen_candidate(
     gray,
     white_mask,
     contour_index
-) -> tuple[np.ndarray, np.ndarray] | None:
+) -> np.ndarray | None:
     height, width = frame_shape[:2]
     frame_area = width * height
 
