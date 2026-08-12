@@ -1,15 +1,18 @@
 
 
+# WebcamRailgun
+
 Welcome to one of the wild project requested by no one ever!
 
-## WebcamRailgun
+This mini project is designed specifically for Youtube video, but you can use this as reference
 
-WebcamRailgun is a computer vision project that transforms a toy gun with an attached webcam into a pointing device. The system uses classic OpenCV techniques to detect and track a target screen in the webcam feed, allowing the gun's pointing direction to be mapped to mouse cursor coordinates.
+## What is it?
+WebcamRailgun is a computer vision project that transforms a webcam into a mouse pointing device. The system uses classic OpenCV techniques to detect and track a target screen in the webcam feed, allowing the pointer direction to be mapped to mouse cursor coordinates.
 
 ## Inspiration
-This project was made on the fly as sort of imagination when I was walking through an arcade station and thinking about how cool it would be to control a computer with a gun without ever buying one of the dedicated arcade gun out there.
+This project was made on the fly as sort of idea when I was walking through an arcade station and thinking about how cool it would be to control a computer with a gun without ever buying one of the dedicated arcade gun or even a cabinet out there.
 
-## How It Works
+## How does it work?
 
 1. Using OpenCV to capture video feed from the webcam attached to any handheld items you have, preferably a gun toy.
 2. It then converts frames to grayscale and applies thresholding to detect white regions (approx.)
@@ -19,16 +22,16 @@ This project was made on the fly as sort of imagination when I was walking throu
    - Quadrilateral shape (4 corners)
    - Convexity
    - Corner angles (approximately 90 degrees)
-5. **Center Calculation**: Computes the center point of the detected screen
-6. **Cursor Mapping**: The detected center can be mapped to mouse cursor position (implementation pending)
+5. From all of the above, compute the center point of the detected screen
+6. The computed center can be mapped to mouse cursor position (implementation pending)
 
 ## Installation
 
 ### Prerequisites
 
 - Python 3.x
-- Webcam attached to your gun toy
-- A white screen or target for detection
+- Webcam attached to anything that points (aka your gun toy)
+- A white border on your screen
 
 ### Setup
 
@@ -38,10 +41,17 @@ git clone <repository-url>
 cd WebcamRailgun
 ```
 
-2. Create a virtual environment:
+2. Create a virtual environment (if necessary):
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+Then, in your Linux terminal:
+```bash
+source .venv/bin/activate
+```
+Or in your Windows terminal:
+```bash
+.venv\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -51,7 +61,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-1. Connect your webcam to the gun toy
+1. Mount your webcam to any physical pointing items you have.
 2. Position a white screen or target in the camera's view
 3. Run the script:
 ```bash
@@ -90,25 +100,8 @@ The system uses a multi-stage detection pipeline:
    - Area validation
    - Polygon approximation to 4 vertices
    - Convexity check
-   - Corner angle validation (45-135 degrees)
+   - Corner angle validation (45-135 degrees or 90 degrees constant, might change this later since it's too high gap I think)
 6. **Center Calculation**: Computes mean of corner coordinates
-
-### Visualization
-
-- **Green rectangle**: Detected screen boundary
-- **Blue circle**: Camera center point
-- **Red circle**: Detected screen center point
-- **"SCREEN" label**: Identifies the detected target
-
-## Future Enhancements
-
-- [ ] Mouse cursor integration for actual cursor control
-- [ ] Calibration system for different screen sizes
-- [ ] Multiple target support
-- [ ] Improved lighting condition handling
-- [ ] Gun orientation tracking using IMU
-- [ ] Recoil simulation
-- [ ] Configurable profiles for different games/applications
 
 ## Troubleshooting
 
@@ -129,8 +122,8 @@ The system uses a multi-stage detection pipeline:
 
 ## License
 
-This project is provided as-is for educational and experimental purposes.
+This project is licensed under [WTFPL](LICENSE) (Just do whatever you want with it, I don't care).
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Contributions are always welcome for this little script! Feel free to submit issues or pull requests.
