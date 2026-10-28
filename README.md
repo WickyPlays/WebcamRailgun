@@ -29,7 +29,7 @@ This project was made on the fly as sort of idea when I was walking through an a
 
 ### Prerequisites
 
-- Python 3.x
+- Python 3.x (This project is tested on Python 3.15.2)
 - Webcam attached to anything that points (aka your gun toy)
 - A white border on your screen
 
