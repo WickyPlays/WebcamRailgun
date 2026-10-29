@@ -7,6 +7,11 @@
 
 import cv2
 import numpy as np
+from pygrabber.dshow_graph import FilterGraph
+
+# Color to detect (BGR format)
+DETECT_COLOR = (255, 255, 255)  # Blue (BGR)
+CURSOR_ACTIVE = True
 
 from debug import (
     reject,
@@ -21,17 +26,51 @@ from debug import (
     print_selected_screen,
     print_screen_center
 )
+from cursor import move_cursor_from_screen_position
 
-# Camera index (default is 0)
-# In laptop case, default might be 1 if an external webcam is used
-cap = cv2.VideoCapture(0)
+# List cam on console and let user choose first
+graph = FilterGraph()
+cameras = graph.get_input_devices() 
+print("Available cameras:")
+
+for i, name in enumerate(cameras):
+    print(f"Camera {i}: {name}")
+
+print(f"Total cameras: {len(cameras)}")
+
+camera_index = int(input("Enter camera index: "))
+cap = cv2.VideoCapture(camera_index)
 
 if not cap.isOpened():
     raise RuntimeError("Could not open webcam")
 
+# Ask for camera flip options
+print("\nCamera flip options:")
+print("1. Flip horizontally")
+print("2. Flip vertically")
+print("3. Flip both horizontally and vertically")
+print("4. Skip (no flip)")
+flip_choice = input("Enter choice (1-4): ").strip()
+
+flip_horizontal = False
+flip_vertical = False
+
+if flip_choice == "1":
+    flip_horizontal = True
+    print("Camera will be flipped horizontally")
+elif flip_choice == "2":
+    flip_vertical = True
+    print("Camera will be flipped vertically")
+elif flip_choice == "3":
+    flip_horizontal = True
+    flip_vertical = True
+    print("Camera will be flipped both horizontally and vertically")
+else:
+    print("No flip applied")
+
 MIN_AREA_RATIO = 0.02
 MAX_AREA_RATIO = 0.95
-WHITE_THRESHOLD = 200
+COLOR_TOLERANCE = 60  # Initial tolerance for color detection (adjustable with R/T)
 APPROX_EPSILON = 0.02
 
 def order_points(points):
@@ -63,7 +102,7 @@ def is_screen_candidate(
     contour,
     frame_shape,
     gray,
-    white_mask,
+    color_mask,
     contour_index
 ) -> np.ndarray | None:
     height, width = frame_shape[:2]
@@ -149,18 +188,18 @@ def is_screen_candidate(
 
     cv2.polylines(border_mask, [points.astype(np.int32)], True, 255, thickness=12)
 
-    border_pixels = white_mask[border_mask > 0]
+    border_pixels = color_mask[border_mask > 0]
 
     if len(border_pixels) == 0:
         return reject("NO BORDER PIXELS", contour, approx)
 
-    white_pixel_count = np.count_nonzero(border_pixels)
-    white_ratio = white_pixel_count / len(border_pixels)
+    color_pixel_count = np.count_nonzero(border_pixels)
+    color_ratio = color_pixel_count / len(border_pixels)
 
-    print_border_info(white_pixel_count, len(border_pixels), white_ratio)
+    print_border_info(color_pixel_count, len(border_pixels), color_ratio)
 
-    if white_ratio < 0.30:
-        return reject(f"WHITE BORDER RATIO TOO LOW ({white_ratio:.4f} < 0.30)", contour, approx)
+    if color_ratio < 0.30:
+        return reject(f"COLOR BORDER RATIO TOO LOW ({color_ratio:.4f} < 0.30)", contour, approx)
 
     print_valid_screen()
 
@@ -169,6 +208,13 @@ def is_screen_candidate(
 # =========[MAIN AREA]===========
 # This is where everything runs
 # ===============================
+
+# Create and resize windows
+cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Camera", 1280, 720)
+cv2.namedWindow("Color Mask", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Color Mask", 640, 480)
+
 while True:
     ret, frame = cap.read()
 
@@ -176,25 +222,35 @@ while True:
         print("Could not read frame")
         break
 
+    # Apply camera flip if selected
+    if flip_horizontal:
+        frame = cv2.flip(frame, 1)
+    if flip_vertical:
+        frame = cv2.flip(frame, 0)
+
     height, width = frame.shape[:2]
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-    white_mask = cv2.inRange(blurred, WHITE_THRESHOLD, 255)
+
+    # Detect color border instead of white
+    lower_color = np.array([max(0, DETECT_COLOR[i] - COLOR_TOLERANCE) for i in range(3)])
+    upper_color = np.array([min(255, DETECT_COLOR[i] + COLOR_TOLERANCE) for i in range(3)])
+    color_mask = cv2.inRange(frame, lower_color, upper_color)
 
     kernel = np.ones((5, 5), np.uint8)
 
-    white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_CLOSE, kernel, iterations=2)
-    white_mask = cv2.morphologyEx(white_mask, cv2.MORPH_OPEN, kernel, iterations=1)
+    color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+    color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN, kernel, iterations=1)
 
-    contours, _ = cv2.findContours(white_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    print_frame_header(width, height, len(contours), WHITE_THRESHOLD, APPROX_EPSILON)
+    print_frame_header(width, height, len(contours), list(DETECT_COLOR), APPROX_EPSILON)
 
     candidates = []
 
     for contour_index, contour in enumerate(contours):
-        points = is_screen_candidate(contour, frame.shape, gray, white_mask, contour_index)
+        points = is_screen_candidate(contour, frame.shape, gray, color_mask, contour_index)
 
         if points is not None:
             area = cv2.contourArea(points)
@@ -231,19 +287,32 @@ while True:
         screen_center = (int(round(screen_center_h[0, 0])), int(round(screen_center_h[1, 0])))
 
         if 0 <= screen_center[0] < width and 0 <= screen_center[1] < height:
-            cv2.circle(frame, screen_center, 10, (255, 0, 0), -1, cv2.LINE_AA)
+            cv2.circle(frame, screen_center, 10, DETECT_COLOR, -1, cv2.LINE_AA)
             cv2.circle(frame, screen_center, 14, (255, 255, 255), 2, cv2.LINE_AA)
             print_screen_center(screen_center)
 
+            # Move cursor based on camera position relative to detected screen
+            if CURSOR_ACTIVE:
+                move_cursor_from_screen_position(camera_center, screen_points)
+
+    # Display current color tolerance on camera view
+    cv2.putText(frame, f"Color Tolerance: {COLOR_TOLERANCE} (R/T to adjust)", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
     # Show all needed windows to debug
     cv2.imshow("Camera", frame)
-    # cv2.imshow("Gray", gray)
-    cv2.imshow("White Mask", white_mask)
+    cv2.imshow("Color Mask", color_mask)
 
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord("q") or key == 27:
         break
+    elif key == ord("r") or key == ord("R"):
+        COLOR_TOLERANCE = max(0, COLOR_TOLERANCE - 5)
+        print(f"Color tolerance decreased to {COLOR_TOLERANCE}")
+    elif key == ord("t") or key == ord("T"):
+        COLOR_TOLERANCE = min(255, COLOR_TOLERANCE + 5)
+        print(f"Color tolerance increased to {COLOR_TOLERANCE}")
 
 cap.release()
 cv2.destroyAllWindows()

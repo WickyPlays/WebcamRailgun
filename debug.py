@@ -46,7 +46,6 @@ def print_corner_value(corner_index, value):
             f"Corner {corner_index} cosine: {value:.4f}"
         )
 
-
 def print_dimensions(width_top, width_bottom, height_left, height_right, avg_width, avg_height, aspect_ratio):
     if DEBUG:
         print(f"Top width: {width_top:.1f}")
@@ -57,24 +56,23 @@ def print_dimensions(width_top, width_bottom, height_left, height_right, avg_wid
         print(f"Average height: {avg_height:.1f}")
         print(f"Aspect ratio: {aspect_ratio:.3f}")
 
-def print_border_info(white_pixel_count, total_border_pixels, white_ratio):
+def print_border_info(color_pixel_count, total_border_pixels, color_ratio):
     if DEBUG:
         print(
-            f"White pixels: "
-            f"{white_pixel_count}/{total_border_pixels}"
+            f"Color pixels: "
+            f"{color_pixel_count}/{total_border_pixels}"
         )
 
         print(
-            f"White border ratio: "
-            f"{white_ratio:.4f}"
+            f"Color border ratio: "
+            f"{color_ratio:.4f}"
         )
-
 
 def print_valid_screen():
     if DEBUG:
         print("[VALID] EXACTLY 4-CORNER SCREEN FOUND")
 
-def print_frame_header(width, height, contours_count, white_threshold, approx_epsilon):
+def print_frame_header(width, height, contours_count, detect_color, approx_epsilon):
     if DEBUG:
         print()
         print("========================================")
@@ -85,7 +83,7 @@ def print_frame_header(width, height, contours_count, white_threshold, approx_ep
             f"Contours found: {contours_count}"
         )
         print(
-            f"White threshold: {white_threshold}"
+            f"Detect color (BGR): {detect_color}"
         )
         print(
             f"Approx epsilon: {approx_epsilon}"
