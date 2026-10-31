@@ -10,7 +10,7 @@ import numpy as np
 from pygrabber.dshow_graph import FilterGraph
 
 # Color to detect (BGR format)
-DETECT_COLOR = (255, 255, 255)  # Blue (BGR)
+DETECT_COLOR = (255, 255, 255)  # White
 CURSOR_ACTIVE = True
 
 from debug import (
@@ -28,10 +28,49 @@ from debug import (
 )
 from cursor import move_cursor_from_screen_position
 
+def choose_camera():
+    graph = FilterGraph()
+    cameras = graph.get_input_devices() 
+    print("Available cameras:")
+    
+    for i, name in enumerate(cameras):
+        print(f"Camera {i}: {name}")
+    
+    print(f"Total cameras: {len(cameras)}")
+    
+    camera_index = int(input("Enter camera index: "))
+    return camera_index
+
+def choose_camera_flip():
+    print("\nCamera flip options:")
+    print("1. Flip horizontally")
+    print("2. Flip vertically")
+    print("3. Flip both horizontally and vertically")
+    print("4. Skip (no flip)")
+    flip_choice = input("Enter choice (1-4): ").strip()
+
+    flip_horizontal = False
+    flip_vertical = False
+
+    if flip_choice == "1":
+        flip_horizontal = True
+        print("Camera will be flipped horizontally")
+    elif flip_choice == "2":
+        flip_vertical = True
+        print("Camera will be flipped vertically")
+    elif flip_choice == "3":
+        flip_horizontal = True
+        flip_vertical = True
+        print("Camera will be flipped both horizontally and vertically")
+    else:
+        print("No flip applied")
+    
+    return flip_horizontal, flip_vertical
+
 # List cam on console and let user choose first
-graph = FilterGraph()
-cameras = graph.get_input_devices() 
-print("Available cameras:")
+camera_index = choose_camera()
+cap = cv2.VideoCapture(camera_index)
+
 
 for i, name in enumerate(cameras):
     print(f"Camera {i}: {name}")
@@ -44,16 +83,8 @@ cap = cv2.VideoCapture(camera_index)
 if not cap.isOpened():
     raise RuntimeError("Could not open webcam")
 
-# Ask for camera flip options
-print("\nCamera flip options:")
-print("1. Flip horizontally")
-print("2. Flip vertically")
-print("3. Flip both horizontally and vertically")
-print("4. Skip (no flip)")
-flip_choice = input("Enter choice (1-4): ").strip()
-
-flip_horizontal = False
-flip_vertical = False
+# Ask for camera flip options   
+flip_horizontal, flip_vertical = choose_camera_flip()
 
 if flip_choice == "1":
     flip_horizontal = True
@@ -70,7 +101,7 @@ else:
 
 MIN_AREA_RATIO = 0.02
 MAX_AREA_RATIO = 0.95
-COLOR_TOLERANCE = 60  # Initial tolerance for color detection (adjustable with R/T)
+COLOR_TOLERANCE = 60  # Initial tolerance for color detection (adjustable with R/T keys)
 APPROX_EPSILON = 0.02
 
 def order_points(points):

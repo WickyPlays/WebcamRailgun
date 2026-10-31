@@ -78,15 +78,6 @@ python index.py
 - Set `DEBUG = True` in `debug.py` to enable verbose logging
 - Set `DEBUG = False` in `debug.py` to disable debug output
 
-## Configuration
-
-You can adjust the following parameters in `index.py`:
-
-- `MIN_AREA_RATIO`: Minimum area as ratio of frame size (default: 0.02)
-- `MAX_AREA_RATIO`: Maximum area as ratio of frame size (default: 0.95)
-- `WHITE_THRESHOLD`: Threshold for white detection (default: 200)
-- `APPROX_EPSILON`: Epsilon for polygon approximation (default: 0.02)
-
 ## Technical Details
 
 ### Detection Algorithm
@@ -116,13 +107,6 @@ The system uses a multi-stage detection pipeline:
 - Check if the correct camera index is set (try 0 or 1)
 - Ensure webcam drivers are installed
 - Verify webcam is working with other applications
-
-### Poor detection accuracy
-- Adjust `WHITE_THRESHOLD` based on lighting conditions (default: 200)
-- Modify `MIN_AREA_RATIO` for different screen sizes (default: 0.02)
-- Ensure the target screen is well-lit and contrasted
-- Check if white border is clearly visible around the screen
-- Adjust `APPROX_EPSILON` if corners are not being detected accurately
 
 ### Performance issues
 - Reduce video resolution in camera settings
