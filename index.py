@@ -71,33 +71,11 @@ def choose_camera_flip():
 camera_index = choose_camera()
 cap = cv2.VideoCapture(camera_index)
 
-
-for i, name in enumerate(cameras):
-    print(f"Camera {i}: {name}")
-
-print(f"Total cameras: {len(cameras)}")
-
-camera_index = int(input("Enter camera index: "))
-cap = cv2.VideoCapture(camera_index)
-
 if not cap.isOpened():
     raise RuntimeError("Could not open webcam")
 
-# Ask for camera flip options   
+# Ask for camera flip options
 flip_horizontal, flip_vertical = choose_camera_flip()
-
-if flip_choice == "1":
-    flip_horizontal = True
-    print("Camera will be flipped horizontally")
-elif flip_choice == "2":
-    flip_vertical = True
-    print("Camera will be flipped vertically")
-elif flip_choice == "3":
-    flip_horizontal = True
-    flip_vertical = True
-    print("Camera will be flipped both horizontally and vertically")
-else:
-    print("No flip applied")
 
 MIN_AREA_RATIO = 0.02
 MAX_AREA_RATIO = 0.95
