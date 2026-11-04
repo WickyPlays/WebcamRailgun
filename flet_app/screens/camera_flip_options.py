@@ -1,8 +1,25 @@
 import flet as ft
+from core.config import get_camera_config, save_setting
 
-# Global variables to store flip options
-flip_horizontal = False
-flip_vertical = False
+# Global variables to store flip options, initialized from config
+_saved_camera_config = get_camera_config()
+flip_horizontal = _saved_camera_config["flip_horizontal"]
+flip_vertical = _saved_camera_config["flip_vertical"]
+
+
+def _get_current_choice() -> str:
+    """Determine the radio option string corresponding to current flip settings."""
+    cfg_choice = get_camera_config().get("flip_choice")
+    if cfg_choice in {"horizontal", "vertical", "both", "none"}:
+        return cfg_choice
+
+    if flip_horizontal and flip_vertical:
+        return "both"
+    elif flip_horizontal:
+        return "horizontal"
+    elif flip_vertical:
+        return "vertical"
+    return "none"
 
 
 def camera_flip_options_page(page: ft.Page):
@@ -11,6 +28,8 @@ def camera_flip_options_page(page: ft.Page):
 
     page.clean()
     page.title = "Webcam Railgun - Camera Flip Options"
+
+    initial_choice = _get_current_choice()
 
     radio_group = ft.RadioGroup(
         content=ft.Column(
@@ -22,11 +41,11 @@ def camera_flip_options_page(page: ft.Page):
             ],
             spacing=10
         ),
-        value="none"
+        value=initial_choice
     )
 
     def on_submit(e):
-        """Apply flip settings and navigate to camera feed."""
+        """Apply flip settings, persist to .ini, and navigate to camera feed."""
         global flip_horizontal, flip_vertical
 
         choice = radio_group.value
@@ -43,6 +62,10 @@ def camera_flip_options_page(page: ft.Page):
         else:  # none
             flip_horizontal = False
             flip_vertical = False
+
+        save_setting("Camera", "flip_horizontal", flip_horizontal)
+        save_setting("Camera", "flip_vertical", flip_vertical)
+        save_setting("Camera", "flip_choice", choice)
 
         from flet_app.screens.camera_feed import camera_feed_page
         camera_feed_page(page)

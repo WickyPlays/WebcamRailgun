@@ -1,8 +1,9 @@
 import flet as ft
 from core.camera import list_cameras
+from core.config import get_camera_config, save_setting
 
-# Global variable to store selected camera index
-selected_camera_index = 0
+# Global variable to store selected camera index, initialized from config
+selected_camera_index = get_camera_config()["selected_camera_index"]
 
 
 def refresh_cameras():
@@ -34,12 +35,17 @@ def camera_selection_page(page: ft.Page):
 
     cameras, radio_controls = build_camera_list()
 
+    # Restore previously selected camera index if valid
+    saved_index_str = str(selected_camera_index)
+    valid_saved = any(rc.value == saved_index_str for rc in radio_controls)
+    initial_value = saved_index_str if valid_saved else ("0" if cameras else None)
+
     radio_group = ft.RadioGroup(
         content=ft.Column(
             controls=radio_controls,
             spacing=10
         ),
-        value="0" if cameras else None
+        value=initial_value
     )
 
     def on_refresh(e):
@@ -47,13 +53,16 @@ def camera_selection_page(page: ft.Page):
         nonlocal cameras, radio_controls
         cameras, radio_controls = build_camera_list()
         radio_group.content.controls = radio_controls
-        radio_group.value = "0" if cameras else None
+        valid_selection = any(rc.value == radio_group.value for rc in radio_controls)
+        radio_group.value = radio_group.value if valid_selection else ("0" if cameras else None)
         page.update()
 
     def on_submit(e):
         """Navigate to camera flip options page."""
         global selected_camera_index
-        selected_camera_index = int(radio_group.value)
+        if radio_group.value is not None:
+            selected_camera_index = int(radio_group.value)
+            save_setting("Camera", "selected_camera_index", selected_camera_index)
         from flet_app.screens.camera_flip_options import camera_flip_options_page
         camera_flip_options_page(page)
 

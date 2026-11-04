@@ -24,7 +24,7 @@ CURSOR_ACTIVE = True
 
 MIN_AREA_RATIO = 0.02
 MAX_AREA_RATIO = 0.95
-COLOR_TOLERANCE = 60  # Initial tolerance for color detection (adjustable with R/T keys)
+COLOR_TOLERANCE = 60  # Initial tolerance for color detection
 APPROX_EPSILON = 0.02
 
 _MORPH_KERNEL = np.ones((5, 5), np.uint8)
@@ -256,7 +256,7 @@ def process_frame(
     if draw_tolerance_overlay:
         cv2.putText(
             frame,
-            f"Color Tolerance: {color_tolerance} (R/T to adjust)",
+            f"Color Tolerance: {color_tolerance}",
             (10, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
