@@ -18,7 +18,6 @@ FRAME_HEIGHT = DEFAULT_FRAME_HEIGHT
 DISPLAY_WIDTH = 560
 DISPLAY_HEIGHT = 420
 
-
 def camera_feed_page(page: ft.Page):
     """Camera feed screen with live processed screen detection and color mask side-by-side."""
     page.clean()
@@ -47,8 +46,6 @@ def camera_feed_page(page: ft.Page):
         fit=ft.BoxFit.CONTAIN,
         filter_quality=ft.FilterQuality.LOW,
     )
-
-    counter = ft.Text("0", size=50, data=0)
 
     def capture_loop():
         nonlocal latest_frames, latest_seq
@@ -113,11 +110,6 @@ def camera_feed_page(page: ft.Page):
             except Exception:
                 break
 
-    def increment_click(e):
-        counter.data += 1
-        counter.value = str(counter.data)
-        counter.update()
-
     def on_keyboard(e: ft.KeyboardEvent):
         nonlocal color_tolerance
         key = e.key.upper()
@@ -171,12 +163,6 @@ def camera_feed_page(page: ft.Page):
                             alignment=ft.MainAxisAlignment.CENTER,
                             spacing=16,
                         ),
-                        ft.Text(
-                            "Click the button to increment the counter",
-                            size=16,
-                            text_align=ft.TextAlign.CENTER,
-                        ),
-                        counter,
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
