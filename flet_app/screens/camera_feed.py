@@ -125,10 +125,39 @@ def camera_feed_page(page: ft.Page):
         camera_flip_options_page(page)
 
     page.on_keyboard_event = on_keyboard
+    page.floating_action_button = None
 
-    page.floating_action_button = ft.FloatingActionButton(
-        icon=ft.Icons.ADD, on_click=increment_click
+    cam_column = ft.Column(
+        [
+            ft.Text("Screen Detection", size=16),
+            video_image,
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
     )
+
+    mask_column = ft.Column(
+        [
+            ft.Text("Color Mask", size=16),
+            mask_image,
+        ],
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+
+    views_row = ft.Row(
+        [cam_column, mask_column],
+        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=16,
+    )
+
+    views_flipped = False
+
+    def toggle_flip_view(e):
+        nonlocal views_flipped
+        views_flipped = not views_flipped
+        views_row.controls = (
+            [mask_column, cam_column] if views_flipped else [cam_column, mask_column]
+        )
+        views_row.update()
 
     page.add(
         ft.SafeArea(
@@ -136,33 +165,28 @@ def camera_feed_page(page: ft.Page):
             content=ft.Container(
                 content=ft.Column(
                     [
-                        ft.Row([
-                            ft.IconButton(ft.Icons.ARROW_BACK, on_click=go_back),
-                            ft.Text(
-                                "Webcam Railgun",
-                                size=20,
-                            ),
-                        ]),
                         ft.Row(
                             [
-                                ft.Column(
+                                ft.Row(
                                     [
-                                        ft.Text("Screen Detection", size=16),
-                                        video_image,
+                                        ft.IconButton(ft.Icons.ARROW_BACK, on_click=go_back),
+                                        ft.Text(
+                                            "Webcam Railgun",
+                                            size=20,
+                                        ),
                                     ],
-                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                                 ),
-                                ft.Column(
-                                    [
-                                        ft.Text("Color Mask", size=16),
-                                        mask_image,
-                                    ],
-                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                ft.IconButton(
+                                    icon=ft.Icons.SWAP_HORIZ,
+                                    tooltip="Flip view between mask and cam",
+                                    on_click=toggle_flip_view,
                                 ),
                             ],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=16,
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         ),
+                        views_row,
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
