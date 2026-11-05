@@ -207,7 +207,7 @@ def button_mapping_page(page: ft.Page):
                                     on_click=on_back,
                                     tooltip="Back to Camera Flip",
                                 ),
-                                ft.Text("Button Mapping", size=26, weight=ft.FontWeight.BOLD),
+                                ft.Text("Step 3: Button Mapping", size=26, weight=ft.FontWeight.BOLD),
                                 ft.Container(width=40),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,

@@ -28,6 +28,8 @@ def camera_flip_options_page(page: ft.Page):
 
     page.clean()
     page.title = "Webcam Railgun - Camera Flip Options"
+    page.window.width = 800
+    page.window.height = 600
 
     initial_choice = _get_current_choice()
 
@@ -45,7 +47,7 @@ def camera_flip_options_page(page: ft.Page):
     )
 
     def on_submit(e):
-        """Apply flip settings, persist to .ini, and navigate to camera feed."""
+        """Apply flip settings, persist to .ini, and navigate to button mapping."""
         global flip_horizontal, flip_vertical
 
         choice = radio_group.value
@@ -85,21 +87,33 @@ def camera_flip_options_page(page: ft.Page):
                             [
                                 ft.IconButton(
                                     icon=ft.Icons.ARROW_BACK,
-                                    on_click=on_back
+                                    on_click=on_back,
+                                    tooltip="Back to Camera Selection",
                                 ),
-                                ft.Text("Camera Flip Options", size=30),
-                            ]
+                                ft.Text("Step 2: Camera Flip Options", size=26, weight=ft.FontWeight.BOLD),
+                                ft.Container(width=40),
+                            ],
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         ),
-                        ft.Text("Please select flip option:", size=20),
+                        ft.Text(
+                            "Select flip options to match your camera orientation.",
+                            size=14,
+                            color=ft.Colors.GREY_400,
+                        ),
+                        ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
                         radio_group,
+                        ft.Divider(height=20, color=ft.Colors.TRANSPARENT),
                         ft.FilledButton(
                             content=ft.Text("Continue"),
-                            on_click=on_submit
+                            icon=ft.Icons.ARROW_FORWARD,
+                            on_click=on_submit,
                         )
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                )
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                ),
+                padding=20,
             )
         )
     )
