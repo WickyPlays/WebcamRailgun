@@ -25,6 +25,8 @@ def welcome_page(page: ft.Page):
             content=ft.Container(
                 content=ft.Column(
                     [
+                        # Borrowed image! 
+                        # TODO: Will try to design my own gun icon for it...
                         ft.Image(
                             src="/gun_icon.png",
                             width=150,
