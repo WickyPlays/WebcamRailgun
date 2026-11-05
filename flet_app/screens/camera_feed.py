@@ -186,8 +186,8 @@ def camera_feed_page(page: ft.Page):
 
     def go_back(e):
         cleanup()
-        from flet_app.screens.camera_flip_options import camera_flip_options_page
-        camera_flip_options_page(page)
+        from flet_app.screens.button_mapping import button_mapping_page
+        button_mapping_page(page)
 
     page.floating_action_button = None
 

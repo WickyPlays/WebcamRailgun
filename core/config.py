@@ -27,6 +27,13 @@ DEFAULT_CONFIG: dict[str, dict[str, str]] = {
         "enabled": "True",
         "offscreen_reload": "True",
     },
+    "Buttons": {
+        "trigger": "Left Click",
+        "secondary": "Right Click",
+        "btnex1": "R",
+        "btnex2": "Shift",
+        "btnex3": "Escape",
+    },
 }
 
 def generate_default_ini(file_path: Path | str = CONFIG_FILE_PATH, force: bool = False) -> Path:
@@ -113,6 +120,16 @@ def get_gun_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, Any]:
         "baudrate": config.getint("Gun", "baudrate", fallback=115200),
         "enabled": config.getboolean("Gun", "enabled", fallback=True),
         "offscreen_reload": config.getboolean("Gun", "offscreen_reload", fallback=True),
+    }
+
+def get_buttons_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, str]:
+    config = load_config(file_path)
+    return {
+        "trigger": config.get("Buttons", "trigger", fallback="Left Click"),
+        "secondary": config.get("Buttons", "secondary", fallback="Right Click"),
+        "btnex1": config.get("Buttons", "btnex1", fallback="R"),
+        "btnex2": config.get("Buttons", "btnex2", fallback="Shift"),
+        "btnex3": config.get("Buttons", "btnex3", fallback="Escape"),
     }
 
 if __name__ == "__main__":

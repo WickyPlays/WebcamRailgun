@@ -4,6 +4,7 @@ import time
 from typing import Callable
 import serial
 import serial.tools.list_ports
+from core.config import get_buttons_config
 
 user32 = ctypes.windll.user32
 
@@ -12,19 +13,128 @@ MOUSEEVENTF_LEFTDOWN = 0x0002
 MOUSEEVENTF_LEFTUP = 0x0004
 MOUSEEVENTF_RIGHTDOWN = 0x0008
 MOUSEEVENTF_RIGHTUP = 0x0010
+MOUSEEVENTF_MIDDLEDOWN = 0x0020
+MOUSEEVENTF_MIDDLEUP = 0x0040
+
+KEYEVENTF_KEYUP = 0x0002
 
 # Windows virtual key codes
+VK_CODES: dict[str, int] = {
+    # Common keys
+    "Space": 0x20,
+    "Enter": 0x0D,
+    "Escape": 0x1B,
+    "Shift": 0x10,
+    "Ctrl": 0x11,
+    "Alt": 0x12,
+    "Tab": 0x09,
+    "Backspace": 0x08,
+    "Caps Lock": 0x14,
+    
+    # Navigation
+    "Up Arrow": 0x26,
+    "Down Arrow": 0x28,
+    "Left Arrow": 0x25,
+    "Right Arrow": 0x27,
+    "Insert": 0x2D,
+    "Delete": 0x2E,
+    "Home": 0x24,
+    "End": 0x23,
+    "Page Up": 0x21,
+    "Page Down": 0x22,
+    
+    # Letters A-Z
+    **{chr(c): c for c in range(0x41, 0x5B)},
+    
+    # Numbers 0-9
+    **{chr(c): c for c in range(0x30, 0x3A)},
+    
+    # Function keys F1-F12
+    **{f"F{i}": 0x70 + (i - 1) for i in range(1, 13)},
+}
+
+# Backward compatibility constants
 VK_RETURN = 0x0D
 VK_SHIFT = 0x10
 VK_ESCAPE = 0x1B
 VK_R = 0x52
-KEYEVENTF_KEYUP = 0x0002
-
-# Button name mappings
-# TODO: Able to be changed later
 BTNEX1_KEY = VK_R
 BTNEX2_KEY = VK_SHIFT
 BTNEX3_KEY = VK_ESCAPE
+
+# Available actions for UI dropdowns and configurations
+AVAILABLE_ACTIONS: list[str] = [
+    "Left Click",
+    "Right Click",
+    "Middle Click",
+    "Space",
+    "Enter",
+    "Escape",
+    "Shift",
+    "Ctrl",
+    "Alt",
+    "Tab",
+    "Backspace",
+    # Letters
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    # Numbers
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+    # Navigation
+    "Up Arrow", "Down Arrow", "Left Arrow", "Right Arrow",
+    # Function keys
+    "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+]
+
+DEFAULT_BUTTON_MAPPINGS: dict[str, str] = {
+    "trigger": "Left Click",
+    "secondary": "Right Click",
+    "btnex1": "R",
+    "btnex2": "Shift",
+    "btnex3": "Escape",
+}
+
+BUTTON_DEFINITIONS = [
+    {
+        "key": "trigger",
+        "name": "Trigger (TRIGGER)",
+        "desc": "Main gun trigger",
+        "default": "Left Click",
+    },
+    {
+        "key": "secondary",
+        "name": "Secondary (SECONDARY)",
+        "desc": "Secondary gun button",
+        "default": "Right Click",
+    },
+    {
+        "key": "btnex1",
+        "name": "Custom Button A",
+        "desc": "Configurable button",
+        "default": "R",
+    },
+    {
+        "key": "btnex2",
+        "name": "Custom Button B",
+        "desc": "Configurable button",
+        "default": "Shift",
+    },
+    {
+        "key": "btnex3",
+        "name": "Custom Button C",
+        "desc": "Configurable button",
+        "default": "Escape",
+    },
+]
+
+MOUSE_EVENT_MAP = {
+    "left click": (MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP),
+    "mouse_left": (MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP),
+    "right click": (MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP),
+    "mouse_right": (MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP),
+    "middle click": (MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP),
+    "mouse_middle": (MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP),
+}
 
 def send_mouse_event(flags: int) -> None:
     user32.mouse_event(flags, 0, 0, 0, 0)
@@ -33,6 +143,69 @@ def send_key_event(vk_code: int, key_up: bool = False) -> None:
     flags = KEYEVENTF_KEYUP if key_up else 0
     user32.keybd_event(vk_code, 0, flags, 0)
 
+def get_vk_code(key_name: str) -> int | None:
+    norm = key_name.strip()
+    if not norm:
+        return None
+
+    lookup = {k.lower(): v for k, v in VK_CODES.items()}
+    aliases = {
+        "esc": 0x1B,
+        "escape": 0x1B,
+        "return": 0x0D,
+        "enter": 0x0D,
+        "control": 0x11,
+        "ctrl": 0x11,
+        "shift": 0x10,
+        "alt": 0x12,
+        "space": 0x20,
+        "spacebar": 0x20,
+        "tab": 0x09,
+        "backspace": 0x08,
+        "caps": 0x14,
+        "capslock": 0x14,
+        "caps lock": 0x14,
+        "up": 0x26,
+        "down": 0x28,
+        "left": 0x25,
+        "right": 0x27,
+        "arrowup": 0x26,
+        "arrowdown": 0x28,
+        "arrowleft": 0x25,
+        "arrowright": 0x27,
+        "up arrow": 0x26,
+        "down arrow": 0x28,
+        "left arrow": 0x25,
+        "right arrow": 0x27,
+    }
+    
+    lookup.update(aliases)
+
+    key_lower = norm.lower()
+    if key_lower in lookup:
+        return lookup[key_lower]
+
+    if len(norm) == 1:
+        try:
+            res = user32.VkKeyScanW(ord(norm))
+            vk = res & 0xFF
+            if vk != 0xFF and vk != 0:
+                return vk
+        except Exception:
+            pass
+
+    return None
+
+def trigger_action(action_name: str, is_down: bool) -> None:
+    norm = action_name.strip().lower()
+    if norm in MOUSE_EVENT_MAP:
+        down_flag, up_flag = MOUSE_EVENT_MAP[norm]
+        send_mouse_event(down_flag if is_down else up_flag)
+        return
+
+    vk = get_vk_code(action_name)
+    if vk is not None:
+        send_key_event(vk, key_up=not is_down)
 
 def list_serial_ports() -> list[tuple[str, str]]:
     ports = serial.tools.list_ports.comports()
@@ -45,11 +218,16 @@ class GunController:
         baudrate: int = 115200,
         is_screen_targeted: Callable[[], bool] | None = None,
         offscreen_reload: bool = True,
+        button_mappings: dict[str, str] | None = None,
     ):
         self.port = port
         self.baudrate = baudrate
         self.is_screen_targeted = is_screen_targeted
         self.offscreen_reload = offscreen_reload
+
+        if button_mappings is None:
+            button_mappings = get_buttons_config()
+        self.button_mappings: dict[str, str] = dict(button_mappings)
 
         self._serial: serial.Serial | None = None
         self._running = False
@@ -59,18 +237,38 @@ class GunController:
         self.on_instruction_received: Callable[[str], None] | None = None
 
         # Instruction to action mapping
-        self.action_map: dict[str, Callable[[], None]] = {
+        self.action_map: dict[str, Callable[[], None]] = {}
+        self.update_action_map(self.button_mappings)
+
+    def update_action_map(self, mappings: dict[str, str]) -> None:
+        self.button_mappings = dict(mappings)
+        self.action_map = {
             "TRIGGER:DOWN": self._handle_trigger_down,
             "TRIGGER:UP": self._handle_trigger_up,
-            "SECONDARY:DOWN": lambda: send_mouse_event(MOUSEEVENTF_RIGHTDOWN),
-            "SECONDARY:UP": lambda: send_mouse_event(MOUSEEVENTF_RIGHTUP),
+            "trigger:DOWN": self._handle_trigger_down,
+            "trigger:UP": self._handle_trigger_up,
+            "SECONDARY:DOWN": lambda: self.execute_button("secondary", is_down=True),
+            "SECONDARY:UP": lambda: self.execute_button("secondary", is_down=False),
+            "secondary:DOWN": lambda: self.execute_button("secondary", is_down=True),
+            "secondary:UP": lambda: self.execute_button("secondary", is_down=False),
             "btnex1:DOWN": self._handle_btnex1_down,
             "btnex1:UP": self._handle_btnex1_up,
-            "btnex2:DOWN": lambda: send_key_event(BTNEX2_KEY, key_up=False),
-            "btnex2:UP": lambda: send_key_event(BTNEX2_KEY, key_up=True),
-            "btnex3:DOWN": lambda: send_key_event(BTNEX3_KEY, key_up=False),
-            "btnex3:UP": lambda: send_key_event(BTNEX3_KEY, key_up=True),
+            "BTNEX1:DOWN": self._handle_btnex1_down,
+            "BTNEX1:UP": self._handle_btnex1_up,
+            "btnex2:DOWN": lambda: self.execute_button("btnex2", is_down=True),
+            "btnex2:UP": lambda: self.execute_button("btnex2", is_down=False),
+            "BTNEX2:DOWN": lambda: self.execute_button("btnex2", is_down=True),
+            "BTNEX2:UP": lambda: self.execute_button("btnex2", is_down=False),
+            "btnex3:DOWN": lambda: self.execute_button("btnex3", is_down=True),
+            "btnex3:UP": lambda: self.execute_button("btnex3", is_down=False),
+            "BTNEX3:DOWN": lambda: self.execute_button("btnex3", is_down=True),
+            "BTNEX3:UP": lambda: self.execute_button("btnex3", is_down=False),
         }
+
+    def execute_button(self, button_name: str, is_down: bool) -> None:
+        action = self.button_mappings.get(button_name)
+        if action:
+            trigger_action(action, is_down=is_down)
 
     def _handle_trigger_down(self) -> None:
         if self.offscreen_reload and self.is_screen_targeted is not None:
@@ -79,25 +277,24 @@ class GunController:
                 self._trigger_btnex1_pulse()
                 return
 
-        # Pointed at screen -> primary fire (left click)
-        send_mouse_event(MOUSEEVENTF_LEFTDOWN)
+        # Pointed at screen -> trigger mapped primary fire action
+        self.execute_button("trigger", is_down=True)
 
     def _handle_trigger_up(self) -> None:
-        send_mouse_event(MOUSEEVENTF_LEFTUP)
+        self.execute_button("trigger", is_down=False)
 
     def _handle_btnex1_down(self) -> None:
-        send_key_event(BTNEX1_KEY, key_up=False)
+        self.execute_button("btnex1", is_down=True)
 
     def _handle_btnex1_up(self) -> None:
-        send_key_event(BTNEX1_KEY, key_up=True)
+        self.execute_button("btnex1", is_down=False)
 
     def _trigger_btnex1_pulse(self) -> None:
-        send_key_event(BTNEX1_KEY, key_up=False)
+        self.execute_button("btnex1", is_down=True)
         time.sleep(0.04)
-        send_key_event(BTNEX1_KEY, key_up=True)
+        self.execute_button("btnex1", is_down=False)
 
     @staticmethod
-    # TODO: Do we even need this?
     def auto_detect_port() -> str | None:
         ports = serial.tools.list_ports.comports()
         for p in ports:

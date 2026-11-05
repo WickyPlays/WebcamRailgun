@@ -30,6 +30,7 @@ from core.config import (
     CONFIG_FILE_PATH,
     DEFAULT_CONFIG,
     generate_default_ini,
+    get_buttons_config,
     get_camera_config,
     get_detection_config,
     get_gun_config,
@@ -39,23 +40,31 @@ from core.config import (
 )
 
 from core.gun_input import (
+    AVAILABLE_ACTIONS,
     BTNEX1_KEY,
     BTNEX2_KEY,
     BTNEX3_KEY,
+    BUTTON_DEFINITIONS,
+    DEFAULT_BUTTON_MAPPINGS,
     GunController,
+    get_vk_code,
     list_serial_ports,
     send_key_event,
     send_mouse_event,
+    trigger_action,
 )
 
 __all__ = [
     "APPROX_EPSILON",
+    "AVAILABLE_ACTIONS",
     "BTNEX1_KEY",
     "BTNEX2_KEY",
     "BTNEX3_KEY",
+    "BUTTON_DEFINITIONS",
     "COLOR_TOLERANCE",
     "CONFIG_FILE_PATH",
     "CURSOR_ACTIVE",
+    "DEFAULT_BUTTON_MAPPINGS",
     "DEFAULT_CONFIG",
     "DEFAULT_FPS",
     "DEFAULT_FRAME_HEIGHT",
@@ -70,10 +79,12 @@ __all__ = [
     "choose_camera_flip",
     "compute_screen_center",
     "generate_default_ini",
+    "get_buttons_config",
     "get_camera_config",
     "get_detection_config",
     "get_gun_config",
     "get_view_config",
+    "get_vk_code",
     "is_screen_candidate",
     "list_cameras",
     "list_serial_ports",
@@ -84,4 +95,5 @@ __all__ = [
     "save_setting",
     "send_key_event",
     "send_mouse_event",
+    "trigger_action",
 ]

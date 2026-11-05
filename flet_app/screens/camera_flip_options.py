@@ -67,8 +67,8 @@ def camera_flip_options_page(page: ft.Page):
         save_setting("Camera", "flip_vertical", flip_vertical)
         save_setting("Camera", "flip_choice", choice)
 
-        from flet_app.screens.camera_feed import camera_feed_page
-        camera_feed_page(page)
+        from flet_app.screens.button_mapping import button_mapping_page
+        button_mapping_page(page)
 
     def on_back(e):
         """Go back to camera selection."""
