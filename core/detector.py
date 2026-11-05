@@ -19,6 +19,10 @@ from debug import (
 )
 
 # Color to detect (BGR format)
+"""
+Can we even use or add feature to detect different colors?
+It seemed that any other color than white was a bit bias due to lighting conditions.
+"""
 DETECT_COLOR = (255, 255, 255)  # White
 CURSOR_ACTIVE = True
 

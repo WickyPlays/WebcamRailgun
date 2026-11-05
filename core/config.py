@@ -25,7 +25,7 @@ DEFAULT_CONFIG: dict[str, dict[str, str]] = {
         "port": "AUTO",
         "baudrate": "115200",
         "enabled": "True",
-        "offscreen_btnex1": "True",
+        "offscreen_reload": "True",
     },
 }
 
@@ -112,7 +112,7 @@ def get_gun_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, Any]:
         "port": config.get("Gun", "port", fallback="AUTO"),
         "baudrate": config.getint("Gun", "baudrate", fallback=115200),
         "enabled": config.getboolean("Gun", "enabled", fallback=True),
-        "offscreen_btnex1": config.getboolean("Gun", "offscreen_btnex1", fallback=True),
+        "offscreen_reload": config.getboolean("Gun", "offscreen_reload", fallback=True),
     }
 
 if __name__ == "__main__":

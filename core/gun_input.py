@@ -44,12 +44,12 @@ class GunController:
         port: str = "AUTO",
         baudrate: int = 115200,
         is_screen_targeted: Callable[[], bool] | None = None,
-        offscreen_btnex1: bool = True,
+        offscreen_reload: bool = True,
     ):
         self.port = port
         self.baudrate = baudrate
         self.is_screen_targeted = is_screen_targeted
-        self.offscreen_btnex1 = offscreen_btnex1
+        self.offscreen_reload = offscreen_reload
 
         self._serial: serial.Serial | None = None
         self._running = False
@@ -73,7 +73,7 @@ class GunController:
         }
 
     def _handle_trigger_down(self) -> None:
-        if self.offscreen_btnex1 and self.is_screen_targeted is not None:
+        if self.offscreen_reload and self.is_screen_targeted is not None:
             if not self.is_screen_targeted():
                 # Pointed off-screen -> trigger btnex1 instead of shooting
                 self._trigger_btnex1_pulse()
