@@ -1,5 +1,5 @@
 import flet as ft
-from core.config import get_buttons_config, save_setting
+from core.config import get_buttons_config, get_gun_config, save_setting
 from core.gun_input import AVAILABLE_ACTIONS, BUTTON_DEFINITIONS, DEFAULT_BUTTON_MAPPINGS
 
 def normalize_flet_key(key: str) -> str:
@@ -163,6 +163,12 @@ def button_mapping_page(page: ft.Page):
             margin=ft.Margin.only(bottom=8),
         )
 
+    gun_cfg = get_gun_config()
+    offscreen_reload_switch = ft.Switch(
+        label="Offscreen Reload (Aim off-screen and pull trigger to reload)",
+        value=gun_cfg.get("offscreen_reload", False),
+    )
+
     button_controls = [build_button_row(b) for b in BUTTON_DEFINITIONS]
 
     def on_reset(e):
@@ -173,6 +179,7 @@ def button_mapping_page(page: ft.Page):
             default_val = DEFAULT_BUTTON_MAPPINGS.get(btn_key, b["default"])
             if btn_key in dropdowns:
                 dropdowns[btn_key].value = default_val
+        offscreen_reload_switch.value = False
         stop_listening()
 
     def on_submit(e):
@@ -181,6 +188,7 @@ def button_mapping_page(page: ft.Page):
             btn_key = b["key"]
             if btn_key in dropdowns and dropdowns[btn_key].value:
                 save_setting("Buttons", btn_key, dropdowns[btn_key].value)
+        save_setting("Gun", "offscreen_reload", offscreen_reload_switch.value)
 
         # Clear keyboard listener before navigation
         page.on_keyboard_event = None
@@ -219,6 +227,7 @@ def button_mapping_page(page: ft.Page):
                             controls=button_controls,
                             spacing=4,
                         ),
+                        offscreen_reload_switch,
                         ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
                         ft.Row(
                             [

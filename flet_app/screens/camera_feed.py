@@ -8,6 +8,7 @@ from core import (
     DEFAULT_FRAME_HEIGHT,
     DEFAULT_FRAME_WIDTH,
     GunController,
+    get_camera_config,
     get_detection_config,
     get_gun_config,
     get_view_config,
@@ -15,8 +16,6 @@ from core import (
     process_frame,
     save_setting,
 )
-from flet_app.screens.camera_selection import selected_camera_index
-from flet_app.screens.camera_flip_options import flip_horizontal, flip_vertical
 
 FRAME_WIDTH = DEFAULT_FRAME_WIDTH
 FRAME_HEIGHT = DEFAULT_FRAME_HEIGHT
@@ -37,6 +36,11 @@ def camera_feed_page(page: ft.Page):
     is_screen_targeted = False
 
     # Load persisted settings from config
+    cam_cfg = get_camera_config()
+    selected_camera_index = cam_cfg.get("selected_camera_index", 0)
+    flip_horizontal = cam_cfg.get("flip_horizontal", False)
+    flip_vertical = cam_cfg.get("flip_vertical", False)
+
     det_cfg = get_detection_config()
     view_cfg = get_view_config()
     gun_cfg = get_gun_config()
@@ -55,7 +59,7 @@ def camera_feed_page(page: ft.Page):
             port=gun_cfg.get("port", "AUTO"),
             baudrate=gun_cfg.get("baudrate", 115200),
             is_screen_targeted=lambda: is_screen_targeted,
-            offscreen_reload=gun_cfg.get("offscreen_reload", True),
+            offscreen_reload=gun_cfg.get("offscreen_reload", False),
         )
         gun_controller.start()
 

@@ -3,9 +3,9 @@
 
 #define TRIGGER_PIN       4   // Main Trigger (Left Click)
 #define SECONDARY_PIN     5   // Secondary Button (Right Click)
-#define BTNEXT1_PIN       25  // Extra Button 1 (btnex1)
-#define BTNEXT2_PIN       32  // Extra Button 2 (btnex2)
-#define BTNEXT3_PIN       33  // Extra Button 3 (btnex3)
+#define BTNEXTA_PIN       32  // Extra Button A (btnexA)
+#define BTNEXTB_PIN       33  // Extra Button B (btnexB)
+#define BTNEXTC_PIN       25  // Extra Button C (btnexC)
 
 struct Button {
   const uint8_t pin;
@@ -17,9 +17,9 @@ struct Button {
 Button buttons[] = {
   {TRIGGER_PIN,   "TRIGGER",   HIGH, 0},
   {SECONDARY_PIN, "SECONDARY", HIGH, 0},
-  {BTNEXT1_PIN,   "btnex1",    HIGH, 0},
-  {BTNEXT2_PIN,   "btnex2",    HIGH, 0},
-  {BTNEXT3_PIN,   "btnex3",    HIGH, 0}
+  {BTNEXTA_PIN,   "btnexA",    HIGH, 0},
+  {BTNEXTB_PIN,   "btnexB",    HIGH, 0},
+  {BTNEXTC_PIN,   "btnexC",    HIGH, 0}
 };
 
 const unsigned long DEBOUNCE_DELAY_MS = 15;
@@ -45,13 +45,13 @@ void loop() {
       btn.lastDebounceTime = now;
       btn.lastState = reading;
 
-      // Active LOW with INPUT_PULLUP
+      // Active LOW with INPUT_PULLUP: LOW (0) = pressed (DOWN), HIGH (1) = released (UP)
       if (reading == LOW) {
         Serial.print(btn.name);
-        Serial.println(":DOWN");
+        Serial.println(":0");
       } else {
         Serial.print(btn.name);
-        Serial.println(":UP");
+        Serial.println(":1");
       }
     }
   }

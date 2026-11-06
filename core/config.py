@@ -25,14 +25,14 @@ DEFAULT_CONFIG: dict[str, dict[str, str]] = {
         "port": "AUTO",
         "baudrate": "115200",
         "enabled": "True",
-        "offscreen_reload": "True",
+        "offscreen_reload": "False",
     },
     "Buttons": {
         "trigger": "Left Click",
         "secondary": "Right Click",
-        "btnex1": "R",
-        "btnex2": "Shift",
-        "btnex3": "Escape",
+        "btnexA": "R",
+        "btnexB": "Shift",
+        "btnexC": "Escape",
     },
 }
 
@@ -119,7 +119,7 @@ def get_gun_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, Any]:
         "port": config.get("Gun", "port", fallback="AUTO"),
         "baudrate": config.getint("Gun", "baudrate", fallback=115200),
         "enabled": config.getboolean("Gun", "enabled", fallback=True),
-        "offscreen_reload": config.getboolean("Gun", "offscreen_reload", fallback=True),
+        "offscreen_reload": config.getboolean("Gun", "offscreen_reload", fallback=False),
     }
 
 def get_buttons_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, str]:
@@ -127,9 +127,9 @@ def get_buttons_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, st
     return {
         "trigger": config.get("Buttons", "trigger", fallback="Left Click"),
         "secondary": config.get("Buttons", "secondary", fallback="Right Click"),
-        "btnex1": config.get("Buttons", "btnex1", fallback="R"),
-        "btnex2": config.get("Buttons", "btnex2", fallback="Shift"),
-        "btnex3": config.get("Buttons", "btnex3", fallback="Escape"),
+        "btnexA": config.get("Buttons", "btnexA", fallback="R"),
+        "btnexB": config.get("Buttons", "btnexB", fallback="Shift"),
+        "btnexC": config.get("Buttons", "btnexC", fallback="Escape"),
     }
 
 if __name__ == "__main__":

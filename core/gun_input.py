@@ -58,9 +58,9 @@ VK_RETURN = 0x0D
 VK_SHIFT = 0x10
 VK_ESCAPE = 0x1B
 VK_R = 0x52
-BTNEX1_KEY = VK_R
-BTNEX2_KEY = VK_SHIFT
-BTNEX3_KEY = VK_ESCAPE
+BTNEXA_KEY = VK_R
+BTNEXB_KEY = VK_SHIFT
+BTNEXC_KEY = VK_ESCAPE
 
 # Available actions for UI dropdowns and configurations
 AVAILABLE_ACTIONS: list[str] = [
@@ -89,9 +89,9 @@ AVAILABLE_ACTIONS: list[str] = [
 DEFAULT_BUTTON_MAPPINGS: dict[str, str] = {
     "trigger": "Left Click",
     "secondary": "Right Click",
-    "btnex1": "R",
-    "btnex2": "Shift",
-    "btnex3": "Escape",
+    "btnexA": "R",
+    "btnexB": "Shift",
+    "btnexC": "Escape",
 }
 
 BUTTON_DEFINITIONS = [
@@ -108,19 +108,19 @@ BUTTON_DEFINITIONS = [
         "default": "Right Click",
     },
     {
-        "key": "btnex1",
+        "key": "btnexA",
         "name": "Custom Button A",
         "desc": "Configurable button",
         "default": "R",
     },
     {
-        "key": "btnex2",
+        "key": "btnexB",
         "name": "Custom Button B",
         "desc": "Configurable button",
         "default": "Shift",
     },
     {
-        "key": "btnex3",
+        "key": "btnexC",
         "name": "Custom Button C",
         "desc": "Configurable button",
         "default": "Escape",
@@ -143,7 +143,7 @@ def send_key_event(vk_code: int, key_up: bool = False) -> None:
     flags = KEYEVENTF_KEYUP if key_up else 0
     user32.keybd_event(vk_code, 0, flags, 0)
 
-def get_vk_code(key_name: str) -> int | None:
+def get_virtual_key_code(key_name: str) -> int | None:
     norm = key_name.strip()
     if not norm:
         return None
@@ -203,7 +203,7 @@ def trigger_action(action_name: str, is_down: bool) -> None:
         send_mouse_event(down_flag if is_down else up_flag)
         return
 
-    vk = get_vk_code(action_name)
+    vk = get_virtual_key_code(action_name)
     if vk is not None:
         send_key_event(vk, key_up=not is_down)
 
@@ -217,7 +217,7 @@ class GunController:
         port: str = "AUTO",
         baudrate: int = 115200,
         is_screen_targeted: Callable[[], bool] | None = None,
-        offscreen_reload: bool = True,
+        offscreen_reload: bool = False,
         button_mappings: dict[str, str] | None = None,
     ):
         self.port = port
@@ -236,34 +236,31 @@ class GunController:
         # Optional listener callback for UI status or debugging
         self.on_instruction_received: Callable[[str], None] | None = None
 
-        # Instruction to action mapping
-        self.action_map: dict[str, Callable[[], None]] = {}
-        self.update_action_map(self.button_mappings)
+        self._trigger_offscreen_fired = False
+        
+        self.update_action_map(button_mappings)
+
+
+    def _normalize_instruction(self, instruction: str) -> tuple[str, bool] | None:
+        parts = instruction.split(":")
+        if len(parts) != 2:
+            return None
+
+        button_name, state = parts[0], parts[1]
+        button_lower = button_name.lower()
+
+        state_lower = state.lower()
+        if state_lower in ("0", "down"):
+            is_down = True
+        elif state_lower in ("1", "up"):
+            is_down = False
+        else:
+            return None
+
+        return button_lower, is_down
 
     def update_action_map(self, mappings: dict[str, str]) -> None:
         self.button_mappings = dict(mappings)
-        self.action_map = {
-            "TRIGGER:DOWN": self._handle_trigger_down,
-            "TRIGGER:UP": self._handle_trigger_up,
-            "trigger:DOWN": self._handle_trigger_down,
-            "trigger:UP": self._handle_trigger_up,
-            "SECONDARY:DOWN": lambda: self.execute_button("secondary", is_down=True),
-            "SECONDARY:UP": lambda: self.execute_button("secondary", is_down=False),
-            "secondary:DOWN": lambda: self.execute_button("secondary", is_down=True),
-            "secondary:UP": lambda: self.execute_button("secondary", is_down=False),
-            "btnex1:DOWN": self._handle_btnex1_down,
-            "btnex1:UP": self._handle_btnex1_up,
-            "BTNEX1:DOWN": self._handle_btnex1_down,
-            "BTNEX1:UP": self._handle_btnex1_up,
-            "btnex2:DOWN": lambda: self.execute_button("btnex2", is_down=True),
-            "btnex2:UP": lambda: self.execute_button("btnex2", is_down=False),
-            "BTNEX2:DOWN": lambda: self.execute_button("btnex2", is_down=True),
-            "BTNEX2:UP": lambda: self.execute_button("btnex2", is_down=False),
-            "btnex3:DOWN": lambda: self.execute_button("btnex3", is_down=True),
-            "btnex3:UP": lambda: self.execute_button("btnex3", is_down=False),
-            "BTNEX3:DOWN": lambda: self.execute_button("btnex3", is_down=True),
-            "BTNEX3:UP": lambda: self.execute_button("btnex3", is_down=False),
-        }
 
     def execute_button(self, button_name: str, is_down: bool) -> None:
         action = self.button_mappings.get(button_name)
@@ -273,26 +270,33 @@ class GunController:
     def _handle_trigger_down(self) -> None:
         if self.offscreen_reload and self.is_screen_targeted is not None:
             if not self.is_screen_targeted():
-                # Pointed off-screen -> trigger btnex1 instead of shooting
-                self._trigger_btnex1_pulse()
+                # Pointed off-screen -> trigger btnexA instead of shooting
+                # Only fire once when going offscreen
+                if not self._trigger_offscreen_fired:
+                    self._trigger_btnexA_pulse()
+                    self._trigger_offscreen_fired = True
                 return
 
-        # Pointed at screen -> trigger mapped primary fire action
+        self._trigger_offscreen_fired = False
         self.execute_button("trigger", is_down=True)
 
     def _handle_trigger_up(self) -> None:
+        if self._trigger_offscreen_fired:
+            self._trigger_offscreen_fired = False
+            return
+        if self._trigger_offscreen_fired:
+            self._trigger_offscreen_fired = False
+            return
+
         self.execute_button("trigger", is_down=False)
 
-    def _handle_btnex1_down(self) -> None:
-        self.execute_button("btnex1", is_down=True)
-
-    def _handle_btnex1_up(self) -> None:
-        self.execute_button("btnex1", is_down=False)
-
-    def _trigger_btnex1_pulse(self) -> None:
-        self.execute_button("btnex1", is_down=True)
-        time.sleep(0.04)
-        self.execute_button("btnex1", is_down=False)
+    def _trigger_btnexA_pulse(self) -> None:
+        if not getattr(self, '_btnexA_firing', False):
+            self._btnexA_firing = True
+            self.execute_button("btnexA", is_down=True)
+            time.sleep(0.04)
+            self.execute_button("btnexA", is_down=False)
+            self._btnexA_firing = False
 
     @staticmethod
     def auto_detect_port() -> str | None:
@@ -348,9 +352,21 @@ class GunController:
                 if self.on_instruction_received:
                     self.on_instruction_received(line)
 
-                action = self.action_map.get(line)
-                if action:
-                    action()
+                normalized = self._normalize_instruction(line)
+                if not normalized:
+                    continue
+
+                button_name, is_down = normalized
+
+                # Handle special cases
+                if button_name == "trigger":
+                    if is_down:
+                        self._handle_trigger_down()
+                    else:
+                        self._handle_trigger_up()
+                else:
+                    # Generic button handling
+                    self.execute_button(button_name, is_down)
             except Exception:
                 break
         self._running = False

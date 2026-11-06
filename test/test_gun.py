@@ -68,29 +68,29 @@ def gun_test_page(page: ft.Page, on_exit: Callable[[], None] | None = None):
     GUN_DEFINED_MAP = {
         "trigger": ("Trigger", "TRIGGER"),
         "secondary": ("Secondary", "SECONDARY"),
-        "btnex1": ("Custom Button A", "btnex1"),
-        "btnex2": ("Custom Button B", "btnex2"),
-        "btnex3": ("Custom Button C", "btnex3"),
+        "btnexa": ("Custom Button A", "btnexA"),
+        "btnexb": ("Custom Button B", "btnexB"),
+        "btnexc": ("Custom Button C", "btnexC"),
     }
 
     # Map configured keys or default keys to the 5 defined buttons
     cfg_trigger = normalize_flet_key(btn_cfg.get("trigger", "Left Click"))
     cfg_secondary = normalize_flet_key(btn_cfg.get("secondary", "Right Click"))
-    cfg_btnex1 = normalize_flet_key(btn_cfg.get("btnex1", "R"))
-    cfg_btnex2 = normalize_flet_key(btn_cfg.get("btnex2", "Shift"))
-    cfg_btnex3 = normalize_flet_key(btn_cfg.get("btnex3", "Escape"))
+    cfg_btnexA = normalize_flet_key(btn_cfg.get("btnexA", "R"))
+    cfg_btnexB = normalize_flet_key(btn_cfg.get("btnexB", "Shift"))
+    cfg_btnexC = normalize_flet_key(btn_cfg.get("btnexC", "Escape"))
 
     KEYBOARD_DEFINED_MAP = {
-        cfg_btnex1: ("Custom Button A", "btnex1"),
-        cfg_btnex2: ("Custom Button B", "btnex2"),
-        cfg_btnex3: ("Custom Button C", "btnex3"),
+        cfg_btnexA: ("Custom Button A", "btnexA"),
+        cfg_btnexB: ("Custom Button B", "btnexB"),
+        cfg_btnexC: ("Custom Button C", "btnexC"),
         cfg_trigger: ("Trigger", "TRIGGER"),
         cfg_secondary: ("Secondary", "SECONDARY"),
         # Built-in defaults
-        "r": ("Custom Button A", "btnex1"),
-        "shift": ("Custom Button B", "btnex2"),
-        "escape": ("Custom Button C", "btnex3"),
-        "esc": ("Custom Button C", "btnex3"),
+        "r": ("Custom Button A", "btnexA"),
+        "shift": ("Custom Button B", "btnexB"),
+        "escape": ("Custom Button C", "btnexC"),
+        "esc": ("Custom Button C", "btnexC"),
     }
 
     # UI controls
@@ -177,7 +177,7 @@ def gun_test_page(page: ft.Page, on_exit: Callable[[], None] | None = None):
             btn_key = btn_part.strip().lower()
             state = state.strip().upper()
 
-            if state == "DOWN":
+            if state in ("DOWN", "0"):
                 if btn_key in GUN_DEFINED_MAP:
                     title, sub = GUN_DEFINED_MAP[btn_key]
                     show_button(title, sub)
