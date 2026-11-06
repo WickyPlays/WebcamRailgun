@@ -113,6 +113,11 @@ The system uses a multi-stage detection pipeline:
 - Close other applications using the webcam
 - Adjust morphological operation iterations
 
+## Notice to AI usage
+
+This project is made with the assist of Devin AI, but only to help with cases in the homography transformation math that I have been stuck on for ages. I still did all the coding and testing myself.
+AI usage is allowed on contributions, but always to triple check before actually pushing the code!
+
 ## License
 
 This project is licensed under [WTFPL](LICENSE) (Just do whatever you want with it, I don't care).
