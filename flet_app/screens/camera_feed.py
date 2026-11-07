@@ -23,7 +23,7 @@ FRAME_HEIGHT = DEFAULT_FRAME_HEIGHT
 DISPLAY_WIDTH = 560
 DISPLAY_HEIGHT = 420
 
-def camera_feed_page(page: ft.Page):
+def camera_feed_page(page: ft.Page, from_welcome: bool = False):
     """Camera feed screen with live processed screen detection and color mask side-by-side."""
     page.clean()
     page.title = "Webcam Railgun - Camera Feed"
@@ -197,8 +197,12 @@ def camera_feed_page(page: ft.Page):
 
     def go_back(e):
         cleanup()
-        from flet_app.screens.button_mapping import button_mapping_page
-        button_mapping_page(page)
+        if from_welcome:
+            from flet_app.screens.welcome import welcome_page
+            welcome_page(page)
+        else:
+            from flet_app.screens.button_mapping import button_mapping_page
+            button_mapping_page(page)
 
     page.floating_action_button = None
 

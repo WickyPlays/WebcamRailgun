@@ -6,8 +6,8 @@ ASSETS_DIR = Path(__file__).resolve().parent / "flet_app" / "assets"
 
 def main(page: ft.Page):
     page.title = "Webcam Railgun"
-    page.window.width = 800
-    page.window.height = 600
+    page.window.width = 960
+    page.window.height = 700
 
     welcome_page(page)
 
