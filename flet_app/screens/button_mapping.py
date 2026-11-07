@@ -197,10 +197,10 @@ def button_mapping_page(page: ft.Page):
         camera_feed_page(page)
 
     def on_back(e):
-        """Navigate back to Step 2: Camera flip options."""
+        """Navigate back to Step 3: Cursor offset."""
         page.on_keyboard_event = None
-        from flet_app.screens.camera_flip_options import camera_flip_options_page
-        camera_flip_options_page(page)
+        from flet_app.screens.cursor_offset import cursor_offset_page
+        cursor_offset_page(page)
 
     page.add(
         ft.SafeArea(
@@ -213,9 +213,9 @@ def button_mapping_page(page: ft.Page):
                                 ft.IconButton(
                                     icon=ft.Icons.ARROW_BACK,
                                     on_click=on_back,
-                                    tooltip="Back to Camera Flip",
+                                    tooltip="Back to Cursor Offset",
                                 ),
-                                ft.Text("Step 3: Button Mapping", size=26, weight=ft.FontWeight.BOLD),
+                                ft.Text("Step 4: Button Mapping", size=26, weight=ft.FontWeight.BOLD),
                                 ft.Container(width=40),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,

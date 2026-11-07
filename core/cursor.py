@@ -39,7 +39,12 @@ user32.SendInput.argtypes = [
 ]
 user32.SendInput.restype = ctypes.c_uint
 
-def move_cursor_from_screen_position(camera_center, screen_points):
+def move_cursor_from_screen_position(
+    camera_center,
+    screen_points,
+    offset_x: int = 0,
+    offset_y: int = 0,
+):
     screen_width = user32.GetSystemMetrics(0)
     screen_height = user32.GetSystemMetrics(1)
 
@@ -63,8 +68,8 @@ def move_cursor_from_screen_position(camera_center, screen_points):
         camera_point, homography
     )[0][0]
 
-    cursor_x = int(screen_point[0])
-    cursor_y = int(screen_point[1])
+    cursor_x = int(screen_point[0]) + int(offset_x)
+    cursor_y = int(screen_point[1]) + int(offset_y)
 
     cursor_x = max(0, min(cursor_x, screen_width - 1))
     cursor_y = max(0, min(cursor_y, screen_height - 1))

@@ -1,5 +1,6 @@
 import flet as ft
 from core.config import get_camera_config, save_setting
+from flet_app.screens.cursor_offset import cursor_offset_page
 
 # Global variables to store flip options, initialized from config
 _saved_camera_config = get_camera_config()
@@ -69,8 +70,7 @@ def camera_flip_options_page(page: ft.Page):
         save_setting("Camera", "flip_vertical", flip_vertical)
         save_setting("Camera", "flip_choice", choice)
 
-        from flet_app.screens.button_mapping import button_mapping_page
-        button_mapping_page(page)
+        cursor_offset_page(page)
 
     def on_back(e):
         """Go back to camera selection."""

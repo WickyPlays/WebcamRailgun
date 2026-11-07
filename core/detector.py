@@ -176,6 +176,8 @@ def process_frame(
     flip_horizontal: bool = False,
     flip_vertical: bool = False,
     cursor_active: bool = CURSOR_ACTIVE,
+    cursor_offset_x: int = 0,
+    cursor_offset_y: int = 0,
     draw_tolerance_overlay: bool = True,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None, tuple[int, int] | None]:
     """
@@ -255,7 +257,12 @@ def process_frame(
 
             # Move cursor based on camera position relative to detected screen
             if cursor_active:
-                move_cursor_from_screen_position(camera_center, screen_points)
+                move_cursor_from_screen_position(
+                    camera_center,
+                    screen_points,
+                    offset_x=cursor_offset_x,
+                    offset_y=cursor_offset_y,
+                )
 
     if draw_tolerance_overlay:
         cv2.putText(

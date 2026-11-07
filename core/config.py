@@ -13,6 +13,10 @@ DEFAULT_CONFIG: dict[str, dict[str, str]] = {
         "flip_vertical": "False",
         "flip_choice": "none",
     },
+    "Cursor": {
+        "offset_x": "0",
+        "offset_y": "0",
+    },
     "Detection": {
         "color_tolerance": "60",
     },
@@ -97,6 +101,13 @@ def get_camera_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, Any
         "flip_horizontal": config.getboolean("Camera", "flip_horizontal", fallback=False),
         "flip_vertical": config.getboolean("Camera", "flip_vertical", fallback=False),
         "flip_choice": config.get("Camera", "flip_choice", fallback="none"),
+    }
+
+def get_cursor_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, int]:
+    config = load_config(file_path)
+    return {
+        "offset_x": config.getint("Cursor", "offset_x", fallback=0),
+        "offset_y": config.getint("Cursor", "offset_y", fallback=0),
     }
 
 def get_detection_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, Any]:

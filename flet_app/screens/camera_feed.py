@@ -9,6 +9,7 @@ from core import (
     DEFAULT_FRAME_WIDTH,
     GunController,
     get_camera_config,
+    get_cursor_config,
     get_detection_config,
     get_gun_config,
     get_view_config,
@@ -40,6 +41,10 @@ def camera_feed_page(page: ft.Page):
     selected_camera_index = cam_cfg.get("selected_camera_index", 0)
     flip_horizontal = cam_cfg.get("flip_horizontal", False)
     flip_vertical = cam_cfg.get("flip_vertical", False)
+
+    cursor_cfg = get_cursor_config()
+    cursor_offset_x = cursor_cfg.get("offset_x", 0)
+    cursor_offset_y = cursor_cfg.get("offset_y", 0)
 
     det_cfg = get_detection_config()
     view_cfg = get_view_config()
@@ -135,6 +140,8 @@ def camera_feed_page(page: ft.Page):
                     flip_horizontal=flip_horizontal,
                     flip_vertical=flip_vertical,
                     cursor_active=cursor_active,
+                    cursor_offset_x=cursor_offset_x,
+                    cursor_offset_y=cursor_offset_y,
                 )
                 is_screen_targeted = screen_points is not None
 
@@ -340,6 +347,37 @@ def camera_feed_page(page: ft.Page):
         save_setting("View", "views_flipped", views_flipped)
         views_row.update()
 
+    offset_x_text = ft.Text(str(cursor_offset_x), size=16, weight=ft.FontWeight.BOLD)
+    offset_y_text = ft.Text(str(cursor_offset_y), size=16, weight=ft.FontWeight.BOLD)
+
+    def decrease_offset_x(e):
+        nonlocal cursor_offset_x
+        cursor_offset_x -= 10
+        offset_x_text.value = str(cursor_offset_x)
+        save_setting("Cursor", "offset_x", cursor_offset_x)
+        offset_x_text.update()
+
+    def increase_offset_x(e):
+        nonlocal cursor_offset_x
+        cursor_offset_x += 10
+        offset_x_text.value = str(cursor_offset_x)
+        save_setting("Cursor", "offset_x", cursor_offset_x)
+        offset_x_text.update()
+
+    def decrease_offset_y(e):
+        nonlocal cursor_offset_y
+        cursor_offset_y -= 10
+        offset_y_text.value = str(cursor_offset_y)
+        save_setting("Cursor", "offset_y", cursor_offset_y)
+        offset_y_text.update()
+
+    def increase_offset_y(e):
+        nonlocal cursor_offset_y
+        cursor_offset_y += 10
+        offset_y_text.value = str(cursor_offset_y)
+        save_setting("Cursor", "offset_y", cursor_offset_y)
+        offset_y_text.update()
+
     tolerance_text = ft.Text(str(color_tolerance), size=16, weight=ft.FontWeight.BOLD)
 
     def decrease_tolerance(e):
@@ -356,19 +394,60 @@ def camera_feed_page(page: ft.Page):
         save_setting("Detection", "color_tolerance", color_tolerance)
         tolerance_text.update()
 
-    tolerance_row = ft.Row(
+    controls_row = ft.Row(
         [
-            ft.Text("Tolerance:", size=16),
-            ft.IconButton(
-                icon=ft.Icons.REMOVE,
-                tooltip="Decrease tolerance",
-                on_click=decrease_tolerance,
+            ft.Row(
+                [
+                    ft.Text("Offset X:", size=16),
+                    ft.IconButton(
+                        icon=ft.Icons.REMOVE,
+                        tooltip="Decrease Offset X by 10 (-10)",
+                        on_click=decrease_offset_x,
+                    ),
+                    offset_x_text,
+                    ft.IconButton(
+                        icon=ft.Icons.ADD,
+                        tooltip="Increase Offset X by 10 (+10)",
+                        on_click=increase_offset_x,
+                    ),
+                ],
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
-            tolerance_text,
-            ft.IconButton(
-                icon=ft.Icons.ADD,
-                tooltip="Increase tolerance",
-                on_click=increase_tolerance,
+            ft.Container(width=16),
+            ft.Row(
+                [
+                    ft.Text("Offset Y:", size=16),
+                    ft.IconButton(
+                        icon=ft.Icons.REMOVE,
+                        tooltip="Decrease Offset Y by 10 (-10)",
+                        on_click=decrease_offset_y,
+                    ),
+                    offset_y_text,
+                    ft.IconButton(
+                        icon=ft.Icons.ADD,
+                        tooltip="Increase Offset Y by 10 (+10)",
+                        on_click=increase_offset_y,
+                    ),
+                ],
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            ),
+            ft.Container(width=16),
+            ft.Row(
+                [
+                    ft.Text("Tolerance:", size=16),
+                    ft.IconButton(
+                        icon=ft.Icons.REMOVE,
+                        tooltip="Decrease tolerance",
+                        on_click=decrease_tolerance,
+                    ),
+                    tolerance_text,
+                    ft.IconButton(
+                        icon=ft.Icons.ADD,
+                        tooltip="Increase tolerance",
+                        on_click=increase_tolerance,
+                    ),
+                ],
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
             ),
         ],
         alignment=ft.MainAxisAlignment.CENTER,
@@ -403,7 +482,7 @@ def camera_feed_page(page: ft.Page):
                             vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         ),
                         views_row,
-                        tolerance_row,
+                        controls_row,
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
