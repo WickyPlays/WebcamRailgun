@@ -91,7 +91,11 @@ def camera_flip_options_page(page: ft.Page):
                                     tooltip="Back to Camera Selection",
                                 ),
                                 ft.Text("Step 2: Camera Flip Options", size=26, weight=ft.FontWeight.BOLD),
-                                ft.Container(width=40),
+                                ft.FilledButton(
+                                    content=ft.Text("Continue"),
+                                    icon=ft.Icons.ARROW_FORWARD,
+                                    on_click=on_submit,
+                                ),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -103,12 +107,6 @@ def camera_flip_options_page(page: ft.Page):
                         ),
                         ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
                         radio_group,
-                        ft.Divider(height=20, color=ft.Colors.TRANSPARENT),
-                        ft.FilledButton(
-                            content=ft.Text("Continue"),
-                            icon=ft.Icons.ARROW_FORWARD,
-                            on_click=on_submit,
-                        )
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,

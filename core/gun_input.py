@@ -246,9 +246,7 @@ class GunController:
         if len(parts) != 2:
             return None
 
-        button_name, state = parts[0], parts[1]
-        button_lower = button_name.lower()
-
+        button_name, state = parts[0].strip(), parts[1].strip()
         state_lower = state.lower()
         if state_lower in ("0", "down"):
             is_down = True
@@ -257,7 +255,20 @@ class GunController:
         else:
             return None
 
-        return button_lower, is_down
+        if button_name.upper() == "TRIGGER":
+            norm_name = "trigger"
+        elif button_name.upper() == "SECONDARY":
+            norm_name = "secondary"
+        elif button_name in ("btnexA", "BTNEXTA"):
+            norm_name = "btnexA"
+        elif button_name in ("btnexB", "BTNEXTB"):
+            norm_name = "btnexB"
+        elif button_name in ("btnexC", "BTNEXTC"):
+            norm_name = "btnexC"
+        else:
+            norm_name = button_name
+
+        return norm_name, is_down
 
     def update_action_map(self, mappings: dict[str, str]) -> None:
         self.button_mappings = dict(mappings)

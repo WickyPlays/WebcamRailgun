@@ -216,7 +216,22 @@ def button_mapping_page(page: ft.Page):
                                     tooltip="Back to Cursor Offset",
                                 ),
                                 ft.Text("Step 4: Button Mapping", size=26, weight=ft.FontWeight.BOLD),
-                                ft.Container(width=40),
+                                ft.Row(
+                                    [
+                                        ft.OutlinedButton(
+                                            content=ft.Text("Reset Defaults"),
+                                            icon=ft.Icons.RESTORE,
+                                            on_click=on_reset,
+                                        ),
+                                        ft.FilledButton(
+                                            content=ft.Text("Continue to Camera View"),
+                                            icon=ft.Icons.ARROW_FORWARD,
+                                            on_click=on_submit,
+                                        ),
+                                    ],
+                                    spacing=8,
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                                ),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             vertical_alignment=ft.CrossAxisAlignment.CENTER,
@@ -228,23 +243,6 @@ def button_mapping_page(page: ft.Page):
                             spacing=4,
                         ),
                         offscreen_reload_switch,
-                        ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
-                        ft.Row(
-                            [
-                                ft.OutlinedButton(
-                                    content=ft.Text("Reset Defaults"),
-                                    icon=ft.Icons.RESTORE,
-                                    on_click=on_reset,
-                                ),
-                                ft.FilledButton(
-                                    content=ft.Text("Continue to Camera View"),
-                                    icon=ft.Icons.ARROW_FORWARD,
-                                    on_click=on_submit,
-                                ),
-                            ],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=16,
-                        ),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,

@@ -64,13 +64,13 @@ def gun_test_page(page: ft.Page, on_exit: Callable[[], None] | None = None):
     btn_cfg = get_buttons_config()
     gun_cfg = get_gun_config()
 
-    # The 5 defined buttons on the hardware gun
+    # The 5 defined buttons on the hardware gun (strictly btnexA, btnexB, btnexC)
     GUN_DEFINED_MAP = {
         "trigger": ("Trigger", "TRIGGER"),
         "secondary": ("Secondary", "SECONDARY"),
-        "btnexa": ("Custom Button A", "btnexA"),
-        "btnexb": ("Custom Button B", "btnexB"),
-        "btnexc": ("Custom Button C", "btnexC"),
+        "btnexA": ("Custom Button A", "btnexA"),
+        "btnexB": ("Custom Button B", "btnexB"),
+        "btnexC": ("Custom Button C", "btnexC"),
     }
 
     # Map configured keys or default keys to the 5 defined buttons
@@ -174,12 +174,19 @@ def gun_test_page(page: ft.Page, on_exit: Callable[[], None] | None = None):
 
         if ":" in cleaned:
             btn_part, state = cleaned.split(":", 1)
-            btn_key = btn_part.strip().lower()
+            btn_key = btn_part.strip()
             state = state.strip().upper()
 
             if state in ("DOWN", "0"):
-                if btn_key in GUN_DEFINED_MAP:
-                    title, sub = GUN_DEFINED_MAP[btn_key]
+                if btn_key.upper() == "TRIGGER":
+                    norm_key = "trigger"
+                elif btn_key.upper() == "SECONDARY":
+                    norm_key = "secondary"
+                else:
+                    norm_key = btn_key
+
+                if norm_key in GUN_DEFINED_MAP:
+                    title, sub = GUN_DEFINED_MAP[norm_key]
                     show_button(title, sub)
                 else:
                     # User pressed a button other than the 5 defined -> quit

@@ -88,10 +88,21 @@ def camera_selection_page(page: ft.Page):
                                     tooltip="Back to Welcome",
                                 ),
                                 ft.Text("Step 1: Camera Selection", size=26, weight=ft.FontWeight.BOLD),
-                                ft.IconButton(
-                                    icon=ft.Icons.REFRESH,
-                                    on_click=on_refresh,
-                                    tooltip="Refresh camera list",
+                                ft.Row(
+                                    [
+                                        ft.IconButton(
+                                            icon=ft.Icons.REFRESH,
+                                            on_click=on_refresh,
+                                            tooltip="Refresh camera list",
+                                        ),
+                                        ft.FilledButton(
+                                            content=ft.Text("Continue"),
+                                            icon=ft.Icons.ARROW_FORWARD,
+                                            on_click=on_submit,
+                                        ),
+                                    ],
+                                    spacing=8,
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                                 ),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -100,12 +111,6 @@ def camera_selection_page(page: ft.Page):
                         subtitle_text,
                         ft.Divider(height=15, color=ft.Colors.TRANSPARENT),
                         radio_group,
-                        ft.Divider(height=20, color=ft.Colors.TRANSPARENT),
-                        ft.FilledButton(
-                            content=ft.Text("Continue"),
-                            icon=ft.Icons.ARROW_FORWARD,
-                            on_click=on_submit,
-                        )
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,

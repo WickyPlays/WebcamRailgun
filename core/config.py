@@ -46,6 +46,7 @@ def generate_default_ini(file_path: Path | str = CONFIG_FILE_PATH, force: bool =
         return path
 
     config = configparser.ConfigParser()
+    config.optionxform = str
     for section, options in DEFAULT_CONFIG.items():
         config[section] = options
 
@@ -60,6 +61,7 @@ def load_config(file_path: Path | str = CONFIG_FILE_PATH) -> configparser.Config
         generate_default_ini(path)
 
     config = configparser.ConfigParser()
+    config.optionxform = str
     config.read(path, encoding="utf-8")
 
     # Ensure all expected sections and keys exist with fallback defaults
@@ -86,6 +88,7 @@ def save_setting(
     file_path: Path | str = CONFIG_FILE_PATH,
 ) -> None:
     config = load_config(file_path)
+    config.optionxform = str
     if not config.has_section(section):
         config.add_section(section)
     config.set(section, key, str(value))
