@@ -8,10 +8,12 @@ from core import (
     DEFAULT_FRAME_HEIGHT,
     DEFAULT_FRAME_WIDTH,
     GunController,
+    WhiteBorderOverlay,
     get_camera_config,
     get_cursor_config,
     get_detection_config,
     get_gun_config,
+    get_monitor_size,
     get_view_config,
     open_camera,
     process_frame,
@@ -56,6 +58,10 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
     cam_visible = view_cfg.get("cam_visible", True)
     mask_visible = view_cfg.get("mask_visible", True)
     views_flipped = view_cfg.get("views_flipped", False)
+
+    # Monitor measurements & white border overlay
+    monitor_w, monitor_h = get_monitor_size()
+    white_border_overlay = WhiteBorderOverlay(thickness=20)
 
     # Initialize ESP32 serial gun controller if enabled
     gun_controller: GunController | None = None
@@ -194,6 +200,8 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
         stop_event.set()
         if gun_controller:
             gun_controller.stop()
+        if white_border_overlay:
+            white_border_overlay.stop()
 
     def go_back(e):
         cleanup()
@@ -458,6 +466,32 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
+    white_border_icon = ft.Icon(ft.Icons.CROP_SQUARE, size=18, color=ft.Colors.WHITE)
+    white_border_label = ft.Text("White Border: OFF", size=13, weight=ft.FontWeight.W_600)
+
+    def toggle_white_border(e):
+        is_active = white_border_overlay.toggle(thickness=20)
+        if is_active:
+            white_border_icon.name = ft.Icons.CHECK_BOX
+            white_border_icon.color = ft.Colors.GREEN_ACCENT
+            white_border_label.value = "White Border: ON"
+            white_border_label.color = ft.Colors.GREEN_ACCENT
+        else:
+            white_border_icon.name = ft.Icons.CROP_SQUARE
+            white_border_icon.color = ft.Colors.WHITE
+            white_border_label.value = "White Border: OFF"
+            white_border_label.color = ft.Colors.WHITE
+        white_border_button.update()
+
+    white_border_button = ft.OutlinedButton(
+        content=ft.Row(
+            [white_border_icon, white_border_label],
+            spacing=6,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        ),
+        on_click=toggle_white_border,
+    )
+
     page.add(
         ft.SafeArea(
             expand=True,
@@ -476,10 +510,17 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
                                     ],
                                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                                 ),
-                                ft.IconButton(
-                                    icon=ft.Icons.SWAP_HORIZ,
-                                    tooltip="Flip view between mask and cam",
-                                    on_click=toggle_flip_view,
+                                ft.Row(
+                                    [
+                                        white_border_button,
+                                        ft.IconButton(
+                                            icon=ft.Icons.SWAP_HORIZ,
+                                            tooltip="Flip view between mask and cam",
+                                            on_click=toggle_flip_view,
+                                        ),
+                                    ],
+                                    spacing=8,
+                                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                                 ),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,

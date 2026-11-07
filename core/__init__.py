@@ -55,6 +55,11 @@ from core.gun_input import (
     trigger_action,
 )
 
+from core.white_border import (
+    WhiteBorderOverlay,
+    get_monitor_size,
+)
+
 __all__ = [
     "APPROX_EPSILON",
     "AVAILABLE_ACTIONS",
@@ -74,6 +79,7 @@ __all__ = [
     "GunController",
     "MAX_AREA_RATIO",
     "MIN_AREA_RATIO",
+    "WhiteBorderOverlay",
     "angle_cos",
     "apply_camera_flip",
     "choose_camera",
@@ -85,6 +91,7 @@ __all__ = [
     "get_cursor_config",
     "get_detection_config",
     "get_gun_config",
+    "get_monitor_size",
     "get_view_config",
     "get_virtual_key_code",
     "is_screen_candidate",
