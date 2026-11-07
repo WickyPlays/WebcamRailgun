@@ -2,23 +2,18 @@ import asyncio
 import threading
 import cv2
 import flet as ft
-from core import (
-    COLOR_TOLERANCE,
-    CURSOR_ACTIVE,
-    DEFAULT_FRAME_HEIGHT,
-    DEFAULT_FRAME_WIDTH,
-    GunController,
-    WhiteBorderOverlay,
+from core.camera import DEFAULT_FRAME_HEIGHT, DEFAULT_FRAME_WIDTH, open_camera
+from core.config import (
     get_camera_config,
     get_cursor_config,
     get_detection_config,
     get_gun_config,
-    get_monitor_size,
     get_view_config,
-    open_camera,
-    process_frame,
     save_setting,
 )
+from core.detector import COLOR_TOLERANCE, CURSOR_ACTIVE, process_frame
+from core.gun_input import GunController
+from core.white_border import WhiteBorderOverlay, get_monitor_size
 
 FRAME_WIDTH = DEFAULT_FRAME_WIDTH
 FRAME_HEIGHT = DEFAULT_FRAME_HEIGHT
