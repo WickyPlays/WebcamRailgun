@@ -3,9 +3,9 @@
 
 #define TRIGGER_PIN       4   // Main Trigger (Left Click)
 #define SECONDARY_PIN     5   // Secondary Button (Right Click)
-#define BTNEXTA_PIN       32  // Extra Button A (btnexA)
-#define BTNEXTB_PIN       33  // Extra Button B (btnexB)
-#define BTNEXTC_PIN       25  // Extra Button C (btnexC)
+#define BTNEXTA_PIN       7  // Extra Button A (btnexA)
+#define BTNEXTB_PIN       8  // Extra Button B (btnexB)
+#define BTNEXTC_PIN       9  // Extra Button C (btnexC)
 
 struct Button {
   const uint8_t pin;
