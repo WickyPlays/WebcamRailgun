@@ -1,6 +1,7 @@
 import flet as ft
 from core.camera import list_cameras
 from core.config import (
+    get_border_config,
     get_buttons_config,
     get_camera_config,
     get_cursor_config,
@@ -24,6 +25,7 @@ def welcome_page(page: ft.Page):
     gun_cfg = get_gun_config()
     btn_cfg = get_buttons_config()
     view_cfg = get_view_config()
+    border_cfg = get_border_config()
 
     saved_camera_index = cam_cfg.get("selected_camera_index", 0)
 
@@ -207,6 +209,7 @@ def welcome_page(page: ft.Page):
                 # 3. Detection
                 section_header("Screen Detection", ft.Icons.COLOR_LENS),
                 config_row("Color Tolerance", str(det_cfg.get("color_tolerance", 60)), ft.Icons.PALETTE),
+                config_row("White Border Thickness", f"{border_cfg.get('thickness', 10)} px", ft.Icons.CROP_SQUARE),
 
                 # 4. Gun Controller
                 section_header("Gun Controller", ft.Icons.MEMORY),

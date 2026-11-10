@@ -109,6 +109,9 @@ user32.ShowWindow.restype = wintypes.BOOL
 user32.UpdateWindow.argtypes = [wintypes.HWND]
 user32.UpdateWindow.restype = wintypes.BOOL
 
+user32.InvalidateRect.argtypes = [wintypes.HWND, ctypes.c_void_p, wintypes.BOOL]
+user32.InvalidateRect.restype = wintypes.BOOL
+
 user32.DestroyWindow.argtypes = [wintypes.HWND]
 user32.DestroyWindow.restype = wintypes.BOOL
 
@@ -149,12 +152,12 @@ def get_monitor_size() -> tuple[int, int]:
 
 class WhiteBorderOverlay:
     """
-    Creates a full-screen, click-through, topmost 20px white border overlay.
+    Creates a full-screen, click-through, topmost white border overlay.
     Uses Win32 region clipping so the entire center is completely hollow and
     transparent with zero input or rendering overhead.
     """
 
-    def __init__(self, thickness: int = 20):
+    def __init__(self, thickness: int = 10):
         self.thickness = thickness
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
@@ -204,6 +207,27 @@ class WhiteBorderOverlay:
         else:
             self.start(thickness)
             return True
+
+    def update_thickness(self, thickness: int):
+        """Update border thickness dynamically if active, and store new thickness."""
+        self.thickness = thickness
+        if self.is_active() and self._hwnd:
+            width, height = get_monitor_size()
+            outer_rgn = gdi32.CreateRectRgn(0, 0, width, height)
+            inner_rgn = gdi32.CreateRectRgn(
+                self.thickness,
+                self.thickness,
+                max(self.thickness, width - self.thickness),
+                max(self.thickness, height - self.thickness),
+            )
+            combined_rgn = gdi32.CreateRectRgn(0, 0, 0, 0)
+            gdi32.CombineRgn(combined_rgn, outer_rgn, inner_rgn, RGN_DIFF)
+            gdi32.DeleteObject(outer_rgn)
+            gdi32.DeleteObject(inner_rgn)
+
+            user32.SetWindowRgn(self._hwnd, combined_rgn, True)
+            user32.InvalidateRect(self._hwnd, None, True)
+            user32.UpdateWindow(self._hwnd)
 
     def _run(self):
         hInstance = kernel32.GetModuleHandleW(None)

@@ -20,6 +20,9 @@ DEFAULT_CONFIG: dict[str, dict[str, str]] = {
     "Detection": {
         "color_tolerance": "60",
     },
+    "Border": {
+        "thickness": "10",
+    },
     "View": {
         "cam_visible": "True",
         "mask_visible": "True",
@@ -117,6 +120,12 @@ def get_detection_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, 
     config = load_config(file_path)
     return {
         "color_tolerance": config.getint("Detection", "color_tolerance", fallback=60),
+    }
+
+def get_border_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, int]:
+    config = load_config(file_path)
+    return {
+        "thickness": config.getint("Border", "thickness", fallback=10),
     }
 
 def get_view_config(file_path: Path | str = CONFIG_FILE_PATH) -> dict[str, Any]:

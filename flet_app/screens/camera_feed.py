@@ -4,6 +4,7 @@ import cv2
 import flet as ft
 from core.camera import DEFAULT_FRAME_HEIGHT, DEFAULT_FRAME_WIDTH, open_camera
 from core.config import (
+    get_border_config,
     get_camera_config,
     get_cursor_config,
     get_detection_config,
@@ -44,10 +45,12 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
     cursor_offset_y = cursor_cfg.get("offset_y", 0)
 
     det_cfg = get_detection_config()
+    border_cfg = get_border_config()
     view_cfg = get_view_config()
     gun_cfg = get_gun_config()
 
     color_tolerance = det_cfg.get("color_tolerance", COLOR_TOLERANCE)
+    border_thickness = border_cfg.get("thickness", 10)
     cursor_active = CURSOR_ACTIVE
 
     cam_visible = view_cfg.get("cam_visible", True)
@@ -56,7 +59,7 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
 
     # Monitor measurements & white border overlay
     monitor_w, monitor_h = get_monitor_size()
-    white_border_overlay = WhiteBorderOverlay(thickness=20)
+    white_border_overlay = WhiteBorderOverlay(thickness=border_thickness)
 
     # Initialize ESP32 serial gun controller if enabled
     gun_controller: GunController | None = None
@@ -465,7 +468,7 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
     white_border_label = ft.Text("White Border: OFF", size=13, weight=ft.FontWeight.W_600)
 
     def toggle_white_border(e):
-        is_active = white_border_overlay.toggle(thickness=20)
+        is_active = white_border_overlay.toggle(thickness=border_thickness)
         if is_active:
             white_border_icon.name = ft.Icons.CHECK_BOX
             white_border_icon.color = ft.Colors.GREEN_ACCENT
@@ -485,6 +488,46 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         ),
         on_click=toggle_white_border,
+    )
+
+    border_thickness_text = ft.Text(str(border_thickness), size=14, weight=ft.FontWeight.BOLD)
+
+    def decrease_border_thickness(e):
+        nonlocal border_thickness
+        if border_thickness > 1:
+            border_thickness -= 1
+            border_thickness_text.value = str(border_thickness)
+            save_setting("Border", "thickness", border_thickness)
+            white_border_overlay.update_thickness(border_thickness)
+            border_thickness_text.update()
+
+    def increase_border_thickness(e):
+        nonlocal border_thickness
+        if border_thickness < 200:
+            border_thickness += 1
+            border_thickness_text.value = str(border_thickness)
+            save_setting("Border", "thickness", border_thickness)
+            white_border_overlay.update_thickness(border_thickness)
+            border_thickness_text.update()
+
+    border_thickness_control = ft.Row(
+        [
+            ft.IconButton(
+                icon=ft.Icons.REMOVE,
+                tooltip="Decrease border thickness (-1)",
+                icon_size=18,
+                on_click=decrease_border_thickness,
+            ),
+            border_thickness_text,
+            ft.IconButton(
+                icon=ft.Icons.ADD,
+                tooltip="Increase border thickness (+1)",
+                icon_size=18,
+                on_click=increase_border_thickness,
+            ),
+        ],
+        spacing=0,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
 
     page.add(
@@ -508,13 +551,14 @@ def camera_feed_page(page: ft.Page, from_welcome: bool = False):
                                 ft.Row(
                                     [
                                         white_border_button,
+                                        border_thickness_control,
                                         ft.IconButton(
                                             icon=ft.Icons.SWAP_HORIZ,
                                             tooltip="Flip view between mask and cam",
                                             on_click=toggle_flip_view,
                                         ),
                                     ],
-                                    spacing=8,
+                                    spacing=4,
                                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                                 ),
                             ],
