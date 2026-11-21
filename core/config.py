@@ -43,6 +43,7 @@ DEFAULT_CONFIG: dict[str, dict[str, str]] = {
     },
 }
 
+# Generate default config file if it doesn't exist
 def generate_default_ini(file_path: Path | str = CONFIG_FILE_PATH, force: bool = False) -> Path:
     path = Path(file_path)
     if path.exists() and not force:
