@@ -100,6 +100,10 @@ def welcome_page(page: ft.Page):
 
         gun_test_page(page, on_exit=return_to_welcome)
 
+    def on_open_settings(e):
+        from flet_app.screens.settings import settings_page
+        settings_page(page)
+
     # --- Config Summary Helpers ---
     def config_row(label: str, value: str, icon: str | None = None) -> ft.Container:
         return ft.Container(
@@ -309,6 +313,19 @@ def welcome_page(page: ft.Page):
                     width=340,
                     height=44,
                     on_click=on_test_gun,
+                ),
+                ft.OutlinedButton(
+                    content=ft.Row(
+                        [
+                            ft.Icon(ft.Icons.SETTINGS, size=18),
+                            ft.Text("Settings", size=14, weight=ft.FontWeight.W_600),
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        spacing=8,
+                    ),
+                    width=340,
+                    height=44,
+                    on_click=on_open_settings,
                 ),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
